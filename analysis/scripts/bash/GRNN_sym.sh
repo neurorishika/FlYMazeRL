@@ -1,9 +1,32 @@
 #!/bin/bash
-RESERVOIR_SIZE=2
 
-python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size $RESERVOIR_SIZE --n_folds 18 --n_ensemble 10 --early_stopping 100 &
-python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size $RESERVOIR_SIZE --n_folds 18 --n_ensemble 10 --early_stopping 100 &
-python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size $RESERVOIR_SIZE --n_folds 18 --n_ensemble 10 --early_stopping 100 &
-python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size $RESERVOIR_SIZE --n_folds 18 --n_ensemble 10 --early_stopping 100 &
-python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size $RESERVOIR_SIZE --n_folds 18 --n_ensemble 10 --early_stopping 100 &
-wait
+bsub -n1 -J "GRNNx2-0" -o "GRNNx2-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx2-1" -o "GRNNx2-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx2-2" -o "GRNNx2-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx2-3" -o "GRNNx2-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx2-4" -o "GRNNx2-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx3-0" -o "GRNNx3-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 3 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx3-1" -o "GRNNx3-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 3 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx3-2" -o "GRNNx3-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 3 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx3-3" -o "GRNNx3-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 3 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx3-4" -o "GRNNx3-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 3 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx5-0" -o "GRNNx5-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx5-1" -o "GRNNx5-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx5-2" -o "GRNNx5-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx5-3" -o "GRNNx5-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx5-4" -o "GRNNx5-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx10-0" -o "GRNNx10-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 10 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx10-1" -o "GRNNx10-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 10 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx10-2" -o "GRNNx10-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 10 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx10-3" -o "GRNNx10-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 10 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx10-4" -o "GRNNx10-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 10 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx100-0" -o "GRNNx100-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 100 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx100-1" -o "GRNNx100-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 100 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx100-2" -o "GRNNx100-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 100 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx100-3" -o "GRNNx100-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 100 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx100-4" -o "GRNNx100-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 100 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx200-0" -o "GRNNx200-0.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 200 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx200-1" -o "GRNNx200-1.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 200 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx200-2" -o "GRNNx200-2.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 200 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx200-3" -o "GRNNx200-3.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 200 --n_folds 18 --n_ensemble 10 --early_stopping 100"
+bsub -n1 -J "GRNNx200-4" -o "GRNNx200-4.output" "python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 200 --n_folds 18 --n_ensemble 10 --early_stopping 100"
