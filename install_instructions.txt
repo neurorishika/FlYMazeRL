@@ -1,0 +1,31 @@
+=============================  Welcome to ================================== 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+=============================================================================
+
+Install Instructions for flymazerl package (Python 3.9 or higher):
+
+    1. Install Python 3.9 or higher using Anaconda (https://www.anaconda.com/download/)
+    2. Create a new conda environment (https://conda.io/docs/user-guide/create-environment/) using:
+        conda create -n flymazerl python=3.9 pip
+    3. Activate the conda environment:
+        conda activate flymazerl
+    4. Install the required packages from conda:
+        conda install numpy matplotlib seaborn pandas pymc3 tqdm arviz
+    5. Install PyTorch (https://pytorch.org/get-started/locally/) based on your machine's hardware:
+        conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch (for setup on Windows with a CUDA-capable GPU / Linux on JRC-Compute Cluster)
+    6. Install OpenAI Gym (https://gym.openai.com/docs/installation/):
+        pip install gym
+    7. Install the FlyMazeRL package locally:
+        pip install -e .
+
+
+    

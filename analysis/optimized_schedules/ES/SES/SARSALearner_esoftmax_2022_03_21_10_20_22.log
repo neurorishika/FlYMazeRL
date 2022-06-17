@@ -1,0 +1,44 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: SARSALearner_esoftmax
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: FlYMazeRL/optimized_schedules/
+save_intermediate: True
+agent: SES
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 10
+optimization_method: annealing
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: primed
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 25
+population_size: 100
+
+
+Replicate 1/10:Best fitness = 0.60608
+Replicate 2/10:Best fitness = 0.59927
+Replicate 3/10:Best fitness = 0.59525
+Replicate 4/10:Best fitness = 0.59837
+Replicate 5/10:Best fitness = 0.60307
+Replicate 6/10:Best fitness = 0.59149
+Replicate 7/10:Best fitness = 0.60146
+Replicate 8/10:Best fitness = 0.5957
+Replicate 9/10:Best fitness = 0.59883
+Replicate 10/10:Best fitness = 0.59474

@@ -1,0 +1,54 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: OSQLearner_esoftmax
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: FlYMazeRL/optimized_schedules/
+save_intermediate: True
+agent: OSQES
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 10
+optimization_method: annealing
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: primed
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 100
+population_size: 100
+
+
+Replicate 1/10:Best fitness = 0.6349099999999999
+Replicate 2/10:Best fitness = 0.63873
+Replicate 1/10:Best fitness = 0.63724
+Replicate 3/10:Best fitness = 0.6435799999999999
+Replicate 4/10:Best fitness = 0.6397999999999999
+Replicate 5/10:Best fitness = 0.6381400000000002
+Replicate 2/10:Best fitness = 0.6335799999999999
+Replicate 6/10:Best fitness = 0.64619
+Replicate 7/10:Best fitness = 0.6399300000000001
+Replicate 3/10:Best fitness = 0.63257
+Replicate 8/10:Best fitness = 0.6403199999999999
+Replicate 9/10:Best fitness = 0.63498
+Replicate 10/10:Best fitness = 0.6373599999999999
+Replicate 4/10:Best fitness = 0.63706
+Replicate 5/10:Best fitness = 0.6363599999999999
+Replicate 6/10:Best fitness = 0.63165
+Replicate 7/10:Best fitness = 0.63
+Replicate 8/10:Best fitness = 0.63171
+Replicate 9/10:Best fitness = 0.62925
+Replicate 10/10:Best fitness = 0.64048

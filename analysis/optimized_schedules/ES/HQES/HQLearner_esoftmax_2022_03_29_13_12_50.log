@@ -1,0 +1,64 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: HQLearner_esoftmax
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: FlYMazeRL/optimized_schedules/
+save_intermediate: True
+agent: HQES
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 10
+optimization_method: annealing
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: random
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 100
+population_size: 100
+
+
+Replicate 1/10:Best fitness = 0.52959
+Replicate 1/10:Best fitness = 0.54331
+Replicate 1/10:Best fitness = 0.54944
+Replicate 2/10:Best fitness = 0.5274
+Replicate 2/10:Best fitness = 0.5434100000000001
+Replicate 2/10:Best fitness = 0.54493
+Replicate 3/10:Best fitness = 0.54495
+Replicate 3/10:Best fitness = 0.52686
+Replicate 3/10:Best fitness = 0.55007
+Replicate 4/10:Best fitness = 0.54506
+Replicate 4/10:Best fitness = 0.53998
+Replicate 4/10:Best fitness = 0.54696
+Replicate 5/10:Best fitness = 0.5475699999999999
+Replicate 5/10:Best fitness = 0.5241800000000001
+Replicate 6/10:Best fitness = 0.54138
+Replicate 5/10:Best fitness = 0.55382
+Replicate 6/10:Best fitness = 0.5481199999999999
+Replicate 6/10:Best fitness = 0.5301300000000001
+Replicate 7/10:Best fitness = 0.54224
+Replicate 8/10:Best fitness = 0.54237
+Replicate 7/10:Best fitness = 0.5465
+Replicate 7/10:Best fitness = 0.5296400000000001
+Replicate 9/10:Best fitness = 0.54415
+Replicate 8/10:Best fitness = 0.55114
+Replicate 10/10:Best fitness = 0.5483199999999999
+Replicate 8/10:Best fitness = 0.5375599999999999
+Replicate 9/10:Best fitness = 0.5500499999999999
+Replicate 9/10:Best fitness = 0.53734
+Replicate 10/10:Best fitness = 0.55097
+Replicate 10/10:Best fitness = 0.53796

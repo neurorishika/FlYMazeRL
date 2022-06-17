@@ -1,0 +1,34 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: HCQLearner_esoftmax
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: FlYMazeRL/optimized_schedules/
+save_intermediate: True
+agent: HCQES
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 10
+optimization_method: genetic
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: random
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 20
+population_size: 100
+
+

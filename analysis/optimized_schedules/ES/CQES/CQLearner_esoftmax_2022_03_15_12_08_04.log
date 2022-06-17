@@ -1,0 +1,44 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: CQLearner_esoftmax
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: FlYMazeRL/optimized_schedules/
+save_intermediate: True
+agent: CQES
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 10
+optimization_method: annealing
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: random
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 25
+population_size: 100
+
+
+Replicate 1/10:Best fitness = 0.52877
+Replicate 2/10:Best fitness = 0.5429200000000001
+Replicate 3/10:Best fitness = 0.54723
+Replicate 4/10:Best fitness = 0.54826
+Replicate 5/10:Best fitness = 0.55631
+Replicate 6/10:Best fitness = 0.57037
+Replicate 7/10:Best fitness = 0.5454600000000001
+Replicate 8/10:Best fitness = 0.5474300000000001
+Replicate 9/10:Best fitness = 0.5456300000000001
+Replicate 10/10:Best fitness = 0.562
