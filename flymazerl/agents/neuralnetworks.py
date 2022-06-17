@@ -3,12 +3,14 @@ import os
 import torch
 import torch.nn as nn
 from flymazerl.agents.base import FlYMazeAgent
+import time
 
-'''
+"""
 +++++++++++++++++++++++++++++++
 Recurrent Neural Network Agents
 +++++++++++++++++++++++++++++++
-'''
+"""
+
 
 class VanillaRNN(nn.Module):
     """
@@ -108,7 +110,6 @@ class VanillaSRNN(nn.Module):
         encoder_size=None,
         allow_negative_values=True,
         device="cpu",
-        
     ):
         """
         Initialize the RNN
@@ -154,7 +155,7 @@ class VanillaSRNN(nn.Module):
         hidden_state: The new hidden state of the RNN (torch.Tensor)
         """
         x = inputs
-        x_ = inputs*torch.tensor([[-1, 1]]).to(self.device)
+        x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
@@ -163,7 +164,7 @@ class VanillaSRNN(nn.Module):
             output_, _ = self.rnn(x_, hidden_state)
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2]))/2
+        final_output = (output + torch.flip(output_, dims=[2])) / 2
         if self.allow_negative_values:
             return final_output
         else:
@@ -326,7 +327,7 @@ class LSTMSNN(nn.Module):
         hidden_state: The new hidden state of the LSTM (torch.Tensor)
         """
         x = inputs
-        x_ = inputs*torch.tensor([[-1, 1]]).to(self.device)
+        x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
@@ -335,7 +336,7 @@ class LSTMSNN(nn.Module):
             output_, _ = self.rnn(x_, hidden_state)
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2]))/2
+        final_output = (output + torch.flip(output_, dims=[2])) / 2
         if self.allow_negative_values:
             return final_output
         else:
@@ -352,7 +353,10 @@ class LSTMSNN(nn.Module):
         Returns:
         hidden_state: The hidden state of the LSTM (torch.Tensor)
         """
-        return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device), torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
+        return (
+            torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device),
+            torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device),
+        )
 
 
 class GRUNN(nn.Module):
@@ -423,7 +427,6 @@ class GRUNN(nn.Module):
             return output
         else:
             return torch.relu(output)
-
 
     def init_hidden(self, batch_size):
         """
@@ -499,7 +502,7 @@ class GRUSNN(nn.Module):
         hidden_state: The new hidden state of the GRU (torch.Tensor)
         """
         x = inputs
-        x_ = inputs*torch.tensor([[-1, 1]]).to(self.device)
+        x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
@@ -508,7 +511,7 @@ class GRUSNN(nn.Module):
             output_, _ = self.rnn(x_, hidden_state)
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2]))/2
+        final_output = (output + torch.flip(output_, dims=[2])) / 2
         if self.allow_negative_values:
             return final_output
         else:
@@ -644,12 +647,12 @@ class GRNNLearner(FlYMazeAgent):
                 ).to(self.device)
             else:
                 raise ValueError("Unknown RNN kind: {}".format(kind))
-        
+
         if pre_trained:
             self.agent.load_state_dict(torch.load(model_path))
-        
+
         self.policy_type = policy_type
-        
+
         self.multi_agent = multi_agent
         self.n_agents = n_agents
         if multi_agent:
@@ -736,7 +739,7 @@ class GRNNLearner(FlYMazeAgent):
 
             if action == self.biased_action:
                 self.bias += 1  # update bias estimate
-            
+
         return new_state, done
 
     def get_q_history(self):
@@ -778,7 +781,7 @@ class GRNNLearner(FlYMazeAgent):
         Returns:
         action_probabilities: The inferred action probabilities (np.array)
         """
-        
+
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
             self.device
         )
@@ -789,8 +792,8 @@ class GRNNLearner(FlYMazeAgent):
             X[:, :, 0] = X[:, :, 0] * 2 - 1
 
         hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
-        logits = self.agent.forward(X.float(),hidden)
-        action_probabilities = logits.softmax(dim=2)[:,:,1].cpu().detach().numpy()
+        logits = self.agent.forward(X.float(), hidden)
+        action_probabilities = logits.softmax(dim=2)[:, :, 1].cpu().detach().numpy()
         return action_probabilities
 
     def load_pre_trained_model(self, model_path):
@@ -812,7 +815,7 @@ class GRNNLearner(FlYMazeAgent):
         learning_rate=0.0005,
         print_every=500,
         weight_decay=1e-5,
-        filter_best = True,
+        filter_best=True,
     ):
         """
         Fit the agent to the data using early stopping
@@ -842,7 +845,12 @@ class GRNNLearner(FlYMazeAgent):
         else:
             X[:, :, 0] = X[:, :, 0] * 2 - 1
 
+        fitting_stats = []
+
         for i in range(n_replications):
+
+            start_time = time.time()
+
             for layer in self.agent.children():
                 if hasattr(layer, "reset_parameters"):
                     layer.reset_parameters()
@@ -858,6 +866,9 @@ class GRNNLearner(FlYMazeAgent):
             X_train, X_val = X[train_indices].to(self.device), X[val_indices].to(self.device)
             y_train, y_val = y[train_indices].to(self.device), y[val_indices].to(self.device)
 
+            training_loss = []
+            validation_loss = []
+
             patience = early_stopping_patience
             best_val_loss = float("inf")
             for epoch in range(max_epochs):
@@ -867,6 +878,8 @@ class GRNNLearner(FlYMazeAgent):
                 output = self.agent(X_train.float(), hidden)
                 output = output.softmax(dim=2).view(-1, self.action_space_size)
                 loss = loss_fn(output, y_train.view(-1).long())
+                training_loss.append(loss.item())
+
                 loss.backward()
                 optimizer.step()
 
@@ -876,7 +889,10 @@ class GRNNLearner(FlYMazeAgent):
                     output = self.agent(X_val.float(), hidden)
                     output = output.softmax(dim=2).view(-1, self.action_space_size)
                     val_loss = loss_fn(output, y_val.view(-1).long())
+                    validation_loss.append(val_loss.item())
+
                 scheduler.step(val_loss)
+
                 if epoch % print_every == 0:
                     print("Epoch {}: \tTraining Loss: {:.4f}\tValidation Loss: {:.4f}".format(epoch, loss, val_loss))
                 if early_stopping:
@@ -888,8 +904,20 @@ class GRNNLearner(FlYMazeAgent):
                         patience -= 1
                     if patience == 0:
                         print("Early stopping at epoch {}".format(epoch))
+                        print("Best validation loss: {:.4f}".format(best_val_loss))
                         break
-        
+
+            fitting_stats.append(
+                {
+                    "training_loss": training_loss,
+                    "validation_loss": validation_loss,
+                    "best_val_loss": best_val_loss,
+                    "epoch": epoch,
+                    "best_val_epoch": epoch - early_stopping_patience,
+                    "training_time": time.time() - start_time,
+                }
+            )
+
         if filter_best:
             print("Finding best model replicate...")
 
@@ -913,14 +941,14 @@ class GRNNLearner(FlYMazeAgent):
                 os.remove("model_{}.pt".format(i))
             print("Best model found!")
 
-        pass
+        return fitting_stats
 
 
-'''
+"""
 +++++++++++++++++++++++++++++++
 Q Function Approximator Network
 +++++++++++++++++++++++++++++++
-'''
+"""
 
 
 class GFFNN(nn.Module):
@@ -1293,7 +1321,7 @@ class GQLearner(FlYMazeAgent):
         """
         assert os.path.exists(model_path), "The model path does not exist."
         self.agent.load_state_dict(torch.load(model_path))
-    
+
     def get_action_probabilities_from_data(self, actions_set, rewards_set):
         """
         Given a dataset, infer the action probabilities
@@ -1305,7 +1333,7 @@ class GQLearner(FlYMazeAgent):
         Returns:
         action_probabilities: The inferred action probabilities (np.array)
         """
-        
+
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
             self.device
         )
@@ -1314,11 +1342,10 @@ class GQLearner(FlYMazeAgent):
             X = X * 2 - 1
         else:
             X[:, :, 0] = X[:, :, 0] * 2 - 1
-        
+
         logits = self.agent.forward_loop(X.float())
-        action_probabilities = logits.softmax(dim=2)[:,:,1].cpu().detach().numpy()
+        action_probabilities = logits.softmax(dim=2)[:, :, 1].cpu().detach().numpy()
         return action_probabilities
-        
 
     def fit(
         self,
@@ -1332,7 +1359,7 @@ class GQLearner(FlYMazeAgent):
         learning_rate=0.0005,
         print_every=500,
         weight_decay=1e-5,
-        filter_best = True,
+        filter_best=True,
     ):
         """
         Fit the agent to the data using early stopping
@@ -1361,7 +1388,12 @@ class GQLearner(FlYMazeAgent):
         else:
             X[:, :, 0] = X[:, :, 0] * 2 - 1
 
+        fitting_stats = []
+
         for i in range(n_replications):
+
+            start_time = time.time()
+
             for layer in self.agent.children():
                 if hasattr(layer, "reset_parameters"):
                     layer.reset_parameters()
@@ -1377,6 +1409,9 @@ class GQLearner(FlYMazeAgent):
             X_train, X_val = X[train_indices].to(self.device), X[val_indices].to(self.device)
             y_train, y_val = y[train_indices].to(self.device), y[val_indices].to(self.device)
 
+            training_loss = []
+            validation_loss = []
+
             patience = early_stopping_patience
             best_val_loss = float("inf")
             for epoch in range(max_epochs):
@@ -1385,6 +1420,8 @@ class GQLearner(FlYMazeAgent):
                 output = self.agent.forward_loop(X_train.float())
                 output = output.softmax(dim=2).view(-1, self.action_space_size)
                 loss = loss_fn(output, y_train.view(-1).long())
+                training_loss.append(loss.item())
+
                 loss.backward()
                 optimizer.step()
 
@@ -1393,7 +1430,10 @@ class GQLearner(FlYMazeAgent):
                     output = self.agent.forward_loop(X_val.float())
                     output = output.softmax(dim=2).view(-1, self.action_space_size)
                     val_loss = loss_fn(output, y_val.view(-1).long())
+                    validation_loss.append(val_loss.item())
+
                 scheduler.step(val_loss)
+
                 if epoch % print_every == 0:
                     print("Epoch {}: \tTraining Loss: {:.4f}\tValidation Loss: {:.4f}".format(epoch, loss, val_loss))
                 if early_stopping:
@@ -1405,8 +1445,20 @@ class GQLearner(FlYMazeAgent):
                         patience -= 1
                     if patience == 0:
                         print("Early stopping at epoch {}".format(epoch))
+                        print("Best validation loss: {:.4f}".format(best_val_loss))
                         break
-        
+
+            fitting_stats.append(
+                {
+                    "training_loss": training_loss,
+                    "validation_loss": validation_loss,
+                    "best_val_loss": best_val_loss,
+                    "epoch": epoch,
+                    "best_val_epoch": epoch - early_stopping_patience,
+                    "training_time": time.time() - start_time,
+                }
+            )
+
         if filter_best:
 
             print("Finding best model replicate...")
@@ -1430,4 +1482,4 @@ class GQLearner(FlYMazeAgent):
                 os.remove("model_{}.pt".format(i))
             print("Best model found!")
 
-        pass
+        return fitting_stats
