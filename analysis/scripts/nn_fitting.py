@@ -4,6 +4,8 @@ import os
 import json
 import random
 import string
+import requests
+import io
 
 from flymazerl.agents.neuralnetworks import GQLearner, GRNNLearner
 from flymazerl.gym.environment import *
@@ -152,8 +154,20 @@ with open(save_path + "params.json", "w") as f:
     json.dump(vars(args), f, indent=4)
 
 # load the data
-action_set = np.loadtxt(args.action_set_data, delimiter=",", dtype=np.int32)
-reward_set = np.loadtxt(args.reward_set_data, delimiter=",", dtype=np.int32)
+if args.action_set_data.startswith("http"):
+    # use requests to download the data
+    response = requests.get(args.action_set_data)
+    response.raise_for_status()
+    action_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+else:
+    action_set = np.loadtxt(args.action_set_data, delimiter=",", dtype=np.int32)
+if args.reward_set_data.startswith("http"):
+    # use requests to download the data
+    response = requests.get(args.reward_set_data)
+    response.raise_for_status()
+    reward_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+else:
+    reward_set = np.loadtxt(args.reward_set_data, delimiter=",", dtype=np.int32)
 
 # create the dataframe to store the results
 results_df = pd.DataFrame(

@@ -3,6 +3,8 @@ import datetime
 import pickle
 from subprocess import call
 import os
+import requests
+import io
 
 from flymazerl.agents.classical import *
 from flymazerl.agents.phenomenological import *
@@ -29,7 +31,8 @@ print(start_text)
 model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
 
 argument_parser = argparse.ArgumentParser(
-    description=start_text + "Script to fit the parameters of the a variety of Classical RL agents to the a 2AFC maze task using Bayesian MCMC."
+    description=start_text
+    + "Script to fit the parameters of the a variety of Classical RL agents to the a 2AFC maze task using Bayesian MCMC."
 )
 argument_parser.add_argument(
     "--exit_on_completion", type=bool, default=True, help="Whether to end the job after completion."
@@ -60,10 +63,7 @@ argument_parser.add_argument(
     "--target_acceptance_rate", type=float, default=0.8, help="Target acceptance rate for MC-MC"
 )
 argument_parser.add_argument(
-    "--n_cores",
-    type=int,
-    default=1,
-    help="Number of cores to use for parallelization",
+    "--n_cores", type=int, default=1, help="Number of cores to use for parallelization",
 )
 argument_parser.add_argument("--n_splits", type=int, default=1, help="Number of subdatasets to split the data into")
 args = argument_parser.parse_args()
@@ -80,8 +80,21 @@ print("Fitting agent: {}".format(agentClass.__name__))
 print("Loading data from:\n{}\n{}".format(args.action_set_data, args.reward_set_data))
 
 if args.n_splits == 1:
-    action_set = list(np.loadtxt(args.action_set_data, delimiter=","))
-    reward_set = list(np.loadtxt(args.reward_set_data, delimiter=","))
+    if args.action_set_data.startswith("http"):
+        # use requests to download the data
+        response = requests.get(args.action_set_data)
+        response.raise_for_status()
+        action_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+    else:
+        action_set = np.loadtxt(args.action_set_data, delimiter=",", dtype=np.int32)
+    if args.reward_set_data.startswith("http"):
+        # use requests to download the data
+        response = requests.get(args.reward_set_data)
+        response.raise_for_status()
+        reward_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+    else:
+        reward_set = np.loadtxt(args.reward_set_data, delimiter=",", dtype=np.int32)
+
     print("Loaded action and reward sets.")
 
     assert len(action_set) == len(reward_set), "Action and reward set must have the same length."
@@ -143,8 +156,21 @@ else:
     assert n_sessions % args.n_splits == 0, "Number of splits must divide the number of sessions."
     n_sessions_per_split = n_sessions // args.n_splits
 
-    full_action_set = list(np.loadtxt(args.action_set_data, delimiter=","))
-    full_reward_set = list(np.loadtxt(args.reward_set_data, delimiter=","))
+    if args.action_set_data.startswith("http"):
+        # use requests to download the data
+        response = requests.get(args.action_set_data)
+        response.raise_for_status()
+        full_action_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+    else:
+        full_action_set = np.loadtxt(args.action_set_data, delimiter=",", dtype=np.int32)
+    if args.reward_set_data.startswith("http"):
+        # use requests to download the data
+        response = requests.get(args.reward_set_data)
+        response.raise_for_status()
+        full_reward_set = np.loadtxt(io.BytesIO(response.content), delimiter=",", dtype=np.int32)
+    else:
+        full_reward_set = np.loadtxt(args.reward_set_data, delimiter=",", dtype=np.int32)
+
     print("Loaded action and reward sets.")
 
     assert len(full_action_set) == len(full_reward_set), "Action and reward set must have the same length."
