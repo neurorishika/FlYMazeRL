@@ -816,6 +816,7 @@ class GRNNLearner(FlYMazeAgent):
         print_every=500,
         weight_decay=1e-5,
         filter_best=True,
+        uid=None,
     ):
         """
         Fit the agent to the data using early stopping
@@ -833,6 +834,7 @@ class GRNNLearner(FlYMazeAgent):
         print_every: The number of epochs to wait before printing the loss (int)
         weight_decay: The weight decay to use for training (float)
         filter_best: Whether or not to filter the best model (bool)
+        uid: The unique identifier of the model (str)
         """
 
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
@@ -899,7 +901,10 @@ class GRNNLearner(FlYMazeAgent):
                     if val_loss < best_val_loss:
                         best_val_loss = val_loss
                         patience = early_stopping_patience
-                        torch.save(self.agent.state_dict(), "model_{}.pt".format(i))
+                        torch.save(
+                            self.agent.state_dict(),
+                            "model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i),
+                        )
                     else:
                         patience -= 1
                     if patience == 0:
@@ -928,7 +933,9 @@ class GRNNLearner(FlYMazeAgent):
                         layer.reset_parameters()
                 loss_fn = nn.CrossEntropyLoss()
 
-                self.agent.load_state_dict(torch.load("model_{}.pt".format(i)))
+                self.agent.load_state_dict(
+                    torch.load("model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i))
+                )
                 self.agent.eval()
                 with torch.no_grad():
                     hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
@@ -937,8 +944,10 @@ class GRNNLearner(FlYMazeAgent):
                     val_loss = loss_fn(output, y.view(-1).long())
                 if val_loss < best_model_loss:
                     best_model_loss = val_loss
-                    torch.save(self.agent.state_dict(), "best_model.pt")
-                os.remove("model_{}.pt".format(i))
+                    torch.save(
+                        self.agent.state_dict(), "best_model.pt" if uid is None else "best_model_{}.pt".format(uid)
+                    )
+                os.remove("model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i))
             print("Best model found!")
 
         return fitting_stats
@@ -1360,6 +1369,7 @@ class GQLearner(FlYMazeAgent):
         print_every=500,
         weight_decay=1e-5,
         filter_best=True,
+        uid=None,
     ):
         """
         Fit the agent to the data using early stopping
@@ -1377,6 +1387,7 @@ class GQLearner(FlYMazeAgent):
         print_every: The number of epochs to wait before printing the loss (int)
         weight_decay: The weight decay to use for training (float)
         filter_best: Whether or not to filter the best model (bool)
+        uid: The unique identifier of the model (str)
         """
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
             self.device
@@ -1440,7 +1451,10 @@ class GQLearner(FlYMazeAgent):
                     if val_loss < best_val_loss:
                         best_val_loss = val_loss
                         patience = early_stopping_patience
-                        torch.save(self.agent.state_dict(), "model_{}.pt".format(i))
+                        torch.save(
+                            self.agent.state_dict(),
+                            "model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i),
+                        )
                     else:
                         patience -= 1
                     if patience == 0:
@@ -1470,7 +1484,9 @@ class GQLearner(FlYMazeAgent):
                         layer.reset_parameters()
                 loss_fn = nn.CrossEntropyLoss()
 
-                self.agent.load_state_dict(torch.load("model_{}.pt".format(i)))
+                self.agent.load_state_dict(
+                    torch.load("model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i))
+                )
                 self.agent.eval()
                 with torch.no_grad():
                     output = self.agent.forward_loop(X.float())
@@ -1478,8 +1494,10 @@ class GQLearner(FlYMazeAgent):
                     val_loss = loss_fn(output, y.view(-1).long())
                 if val_loss < best_model_loss:
                     best_model_loss = val_loss
-                    torch.save(self.agent.state_dict(), "best_model.pt")
-                os.remove("model_{}.pt".format(i))
+                    torch.save(
+                        self.agent.state_dict(), "best_model.pt" if uid is None else "best_model_{}.pt".format(uid)
+                    )
+                os.remove("model_{}.pt".format(i) if uid is None else "model_{}_{}.pt".format(uid, i))
             print("Best model found!")
 
         return fitting_stats

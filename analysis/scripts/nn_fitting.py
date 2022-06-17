@@ -2,6 +2,8 @@ import argparse
 import datetime
 import os
 import json
+import random
+import string
 
 from flymazerl.agents.neuralnetworks import GQLearner, GRNNLearner
 from flymazerl.gym.environment import *
@@ -255,10 +257,14 @@ for ensemble_id in range(args.n_ensemble):
     for fold_id, (train_set, val_set) in enumerate(zip(training_sets, validation_sets)):
         # start fitting the model
         print("Fitting model {}/{}. Fold {}/{}".format(ensemble_id + 1, args.n_ensemble, fold_id + 1, args.n_folds))
-        fit_statistics = agent.fit(train_set["actions"], train_set["rewards"], **fit_params)
+
+        # generate a unique model ID as a random 8-character string
+        model_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+        fit_statistics = agent.fit(train_set["actions"], train_set["rewards"], uid=model_id, **fit_params)
 
         # move model_0.pt to save_path after renaming it to ensemble_id_fold_id.pt
-        os.rename("model_0.pt", save_path + "ensemble_{}_fold_{}.pt".format(ensemble_id, fold_id))
+        os.rename(f"model_{model_id}_0.pt", save_path + "ensemble_{}_fold_{}.pt".format(ensemble_id, fold_id))
 
         # load the model
         agent.load_pre_trained_model(save_path + "ensemble_{}_fold_{}.pt".format(ensemble_id, fold_id))
