@@ -1,0 +1,8 @@
+numpy
+matplotlib
+pandas
+seaborn
+pymc3
+arviz
+torch
+tqdm

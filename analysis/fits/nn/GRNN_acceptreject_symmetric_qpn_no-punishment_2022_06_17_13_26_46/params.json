@@ -1,0 +1,28 @@
+{
+    "save_path": "../fits/nn/",
+    "agent": "QRNN",
+    "action_set_data": "https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/action_set.csv",
+    "reward_set_data": "https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/reward_set.csv",
+    "n_folds": 18,
+    "n_ensemble": 5,
+    "history_size": 10,
+    "max_epochs": 10000,
+    "early_stopping": 50,
+    "learning_rate": 0.0005,
+    "weight_decay": 1e-05,
+    "print_every": 500,
+    "train_test_split": 0.8,
+    "reservoir_size": 2,
+    "num_reservoirs": 1,
+    "encoder_size": null,
+    "kind": "RNN",
+    "hidden_state_sizes": [
+        10
+    ],
+    "activation": "relu",
+    "policy_type": "acceptreject",
+    "device": "cpu",
+    "symmetric": true,
+    "allow_negative": true,
+    "omission_is_punishment": false
+}

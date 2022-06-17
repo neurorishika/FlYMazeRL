@@ -1,0 +1,9 @@
+LICENSE
+README.md
+setup.py
+flymazerl/__init__.py
+flymazerl.egg-info/PKG-INFO
+flymazerl.egg-info/SOURCES.txt
+flymazerl.egg-info/dependency_links.txt
+flymazerl.egg-info/requires.txt
+flymazerl.egg-info/top_level.txt
