@@ -1,0 +1,100 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GRNNLearner
+Loading data from:
+https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/action_set.csv
+https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/reward_set.csv
+Model: GRNN_1x2_RNN_acceptreject_symmetric_qpn_no-punishment_2022_06_17_15_18_38_488986
+Fitting model 1/1. Fold 1/2
+Epoch 0: 	Training Loss: 0.6963	Validation Loss: 0.6973
+Epoch 500: 	Training Loss: 0.6774	Validation Loss: 0.6759
+Epoch 1000: 	Training Loss: 0.6656	Validation Loss: 0.6585
+Epoch 01448: reducing learning rate of group 0 to 2.5000e-04.
+Epoch 01454: reducing learning rate of group 0 to 1.2500e-04.
+Epoch 01460: reducing learning rate of group 0 to 6.2500e-05.
+Epoch 01466: reducing learning rate of group 0 to 3.1250e-05.
+Epoch 01472: reducing learning rate of group 0 to 1.5625e-05.
+Epoch 01478: reducing learning rate of group 0 to 7.8125e-06.
+Epoch 01484: reducing learning rate of group 0 to 3.9063e-06.
+Epoch 01490: reducing learning rate of group 0 to 1.9531e-06.
+Epoch 01496: reducing learning rate of group 0 to 9.7656e-07.
+Epoch 1500: 	Training Loss: 0.6447	Validation Loss: 0.6233
+Epoch 01502: reducing learning rate of group 0 to 4.8828e-07.
+Epoch 01508: reducing learning rate of group 0 to 2.4414e-07.
+Epoch 01514: reducing learning rate of group 0 to 1.2207e-07.
+Epoch 01520: reducing learning rate of group 0 to 6.1035e-08.
+Epoch 01526: reducing learning rate of group 0 to 3.0518e-08.
+Epoch 01532: reducing learning rate of group 0 to 1.5259e-08.
+Early stopping at epoch 1542
+Best validation loss: 0.6225
+Fitting model 1/1. Fold 2/2
+Epoch 0: 	Training Loss: 0.7049	Validation Loss: 0.7014
+Epoch 500: 	Training Loss: 0.6717	Validation Loss: 0.6751
+Epoch 1000: 	Training Loss: 0.6375	Validation Loss: 0.6477
+Epoch 01206: reducing learning rate of group 0 to 2.5000e-04.
+Epoch 01213: reducing learning rate of group 0 to 1.2500e-04.
+Epoch 01219: reducing learning rate of group 0 to 6.2500e-05.
+Epoch 01225: reducing learning rate of group 0 to 3.1250e-05.
+Epoch 01231: reducing learning rate of group 0 to 1.5625e-05.
+Epoch 01237: reducing learning rate of group 0 to 7.8125e-06.
+Epoch 01243: reducing learning rate of group 0 to 3.9063e-06.
+Epoch 01249: reducing learning rate of group 0 to 1.9531e-06.
+Epoch 01255: reducing learning rate of group 0 to 9.7656e-07.
+Epoch 01261: reducing learning rate of group 0 to 4.8828e-07.
+Epoch 01267: reducing learning rate of group 0 to 2.4414e-07.
+Epoch 01273: reducing learning rate of group 0 to 1.2207e-07.
+Epoch 01279: reducing learning rate of group 0 to 6.1035e-08.
+Epoch 01285: reducing learning rate of group 0 to 3.0518e-08.
+Epoch 01291: reducing learning rate of group 0 to 1.5259e-08.
+Early stopping at epoch 1372
+Best validation loss: 0.6442
+Fitting is complete. The model fitting log is available at ../fits/nn/model_fitting_log.csv.
+The model is available at ../fits/nn/GRNN_1x2_RNN_acceptreject_symmetric_qpn_no-punishment_2022_06_17_15_18_38_488986/.
+Thank you for using flymazerl. Have a nice day :)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@h07u25>
+Subject: Job 122608158: <test> in cluster <Janelia> Done
+
+Job <test> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Fri Jun 17 15:18:21 2022
+Job was executed on host(s) <h07u25>, in queue <local>, as user <mohantas> in cluster <Janelia> at Fri Jun 17 15:18:22 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/analysis/scripts> was used as the working directory.
+Started at Fri Jun 17 15:18:22 2022
+Terminated at Fri Jun 17 15:20:31 2022
+Results reported at Fri Jun 17 15:20:31 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python nn_fitting.py --agent GRNN --num_reservoir 1 --reservoir_size 2 --n_folds 2 --n_ensemble 1 --early_stopping 100
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   204.14 sec.
+    Max Memory :                                 226 MB
+    Average Memory :                             209.09 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15134.00 MB
+    Max Swap :                                   -
+    Max Processes :                              6
+    Max Threads :                                15
+    Run time :                                   130 sec.
+    Turnaround time :                            130 sec.
+
+The output (if any) is above this job summary.
+
