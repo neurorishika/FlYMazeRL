@@ -93,14 +93,19 @@ argument_parser.add_argument(
     "--device", type=str, default="cpu", help="Device to use. (Only for GRNN; options: cpu, cuda)"
 )
 argument_parser.add_argument(
-    "--symmetric", type=bool, default=True, help="Whether to use symmetric or asymmetric networks."
+    "--symmetric", type=str, default='yes', help="Whether to use symmetric or asymmetric networks (yes/no)."
 )
-argument_parser.add_argument("--allow_negative", type=bool, default=True, help="Whether to allow negative Q values.")
+argument_parser.add_argument("--allow_negative", type=str, default='yes', help="Whether to allow negative Q values.")
 argument_parser.add_argument(
-    "--omission_is_punishment", type=bool, default=False, help="Whether to use omission as a punishment."
+    "--omission_is_punishment", type=str, default='no', help="Whether to use omission as a punishment."
 )
 
 args = argument_parser.parse_args()
+
+# process booleans
+args.symmetric = True if args.symmetric == "yes" else False 
+args.allow_negative = True if args.allow_negative == "yes" else False
+args.omission_is_punishment = True if args.omission_is_punishment == "yes" else False
 
 assert args.save_path[-1] == "/", "Save path must end with a '/'"
 assert os.path.exists(args.save_path), "Save path does not exist"

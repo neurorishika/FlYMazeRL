@@ -34,9 +34,6 @@ argument_parser = argparse.ArgumentParser(
     description=start_text
     + "Script to fit the parameters of the a variety of Classical RL agents to the a 2AFC maze task using Bayesian MCMC."
 )
-argument_parser.add_argument(
-    "--exit_on_completion", type=bool, default=True, help="Whether to end the job after completion."
-)
 argument_parser.add_argument("--save_path", type=str, default="../fits/", help="Path to save the fits.")
 argument_parser.add_argument(
     "--agent",

@@ -13,3 +13,11 @@ ipython_config.py
 # ignore all folder with the name in any directory/subdirectory: raw.githubusercontent.com
 **/raw.githubusercontent.com/
 
+# ignore all fit results
+**/nn/GRNN*
+**/nn/GQNN*
+
+# ignore fit logs
+**/scripts/GRNN*
+**/scripts/GQNN*
+**/scripts/model*
