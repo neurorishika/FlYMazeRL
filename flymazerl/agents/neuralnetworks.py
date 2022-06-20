@@ -78,7 +78,7 @@ class VanillaRNN(nn.Module):
         if self.allow_negative_values:
             output = self.decoder(output)
         else:
-            output = torch.relu(self.decoder(output))
+            output = torch.sigmoid(self.decoder(output))
         return output
 
     def init_hidden(self, batch_size):
@@ -168,7 +168,7 @@ class VanillaSRNN(nn.Module):
         if self.allow_negative_values:
             return final_output
         else:
-            return torch.relu(final_output)
+            return torch.sigmoid(final_output)
 
     def init_hidden(self, batch_size):
         """
@@ -251,7 +251,7 @@ class LSTMNN(nn.Module):
         if self.allow_negative_values:
             return output
         else:
-            return torch.relu(output)
+            return torch.sigmoid(output)
 
     def init_hidden(self, batch_size):
         """
@@ -340,7 +340,7 @@ class LSTMSNN(nn.Module):
         if self.allow_negative_values:
             return final_output
         else:
-            return torch.relu(final_output)
+            return torch.sigmoid(final_output)
 
     def init_hidden(self, batch_size):
         """
@@ -426,7 +426,7 @@ class GRUNN(nn.Module):
         if self.allow_negative_values:
             return output
         else:
-            return torch.relu(output)
+            return torch.sigmoid(output)
 
     def init_hidden(self, batch_size):
         """
@@ -515,7 +515,7 @@ class GRUSNN(nn.Module):
         if self.allow_negative_values:
             return final_output
         else:
-            return torch.relu(final_output)
+            return torch.sigmoid(final_output)
 
     def init_hidden(self, batch_size):
         """
@@ -682,6 +682,29 @@ class GRNNLearner(FlYMazeAgent):
             elif self.policy_type == "greedy":
                 action_probabilities = action_logits[:, -1, :]
                 action = action_probabilities.argmax(dim=1)
+            elif self.policy_type == "acceptreject":
+                action_probabilities = torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(action_logits[:, :, 0])
+                            + torch.log(3 - action_logits[:, :, 1])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                            torch.log(action_logits[:, :, 1])
+                            + torch.log(3 - action_logits[:, :, 0])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                )[:, -1, :]
+                action = torch.multinomial(action_probabilities, 1)
             else:
                 raise ValueError("Unknown policy type: {}".format(self.policy_type))
 
@@ -719,6 +742,29 @@ class GRNNLearner(FlYMazeAgent):
             elif self.policy_type == "greedy":
                 action_probabilities = action_logits.squeeze(0)[-1]
                 action = action_probabilities.argmax().item()
+            elif self.policy_type == "acceptreject":
+                action_probabilities = torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(action_logits[:, :, 0])
+                            + torch.log(3 - action_logits[:, :, 1])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                            torch.log(action_logits[:, :, 1])
+                            + torch.log(3 - action_logits[:, :, 0])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                ).squeeze(0)[-1]
+                action = torch.multinomial(action_probabilities, 1).item()
             else:
                 raise ValueError("Unknown policy type: {}".format(self.policy_type))
 
@@ -817,6 +863,7 @@ class GRNNLearner(FlYMazeAgent):
         weight_decay=1e-5,
         filter_best=True,
         uid=None,
+        tolerance=1e-4,
     ):
         """
         Fit the agent to the data using early stopping
@@ -835,6 +882,7 @@ class GRNNLearner(FlYMazeAgent):
         weight_decay: The weight decay to use for training (float)
         filter_best: Whether or not to filter the best model (bool)
         uid: The unique identifier of the model (str)
+        tolerance: The tolerance for the loss (float)
         """
 
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
@@ -878,7 +926,30 @@ class GRNNLearner(FlYMazeAgent):
                 optimizer.zero_grad()
                 hidden = self.agent.init_hidden(X_train.shape[0]).to(self.device)
                 output = self.agent(X_train.float(), hidden)
-                output = output.softmax(dim=2).view(-1, self.action_space_size)
+                if self.policy_type == "softmax":
+                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                elif self.policy_type == "greedy":
+                    output = output.argmax(dim=2).view(-1)
+                elif self.policy_type == "acceptreject":
+                    output = torch.exp(
+                        torch.stack(
+                            [
+                                torch.log(output[:, :, 0])
+                                + torch.log(3 - output[:, :, 1])
+                                - torch.log(
+                                    3 * output[:, :, 1] + 3 * output[:, :, 0] - 2 * output[:, :, 0] * output[:, :, 1]
+                                ),
+                                torch.log(output[:, :, 1])
+                                + torch.log(3 - output[:, :, 0])
+                                - torch.log(
+                                    3 * output[:, :, 1] + 3 * output[:, :, 0] - 2 * output[:, :, 0] * output[:, :, 1]
+                                ),
+                            ],
+                            dim=2,
+                        )
+                    ).view(-1, self.action_space_size)
+                else:
+                    raise ValueError("Unknown policy type.")
                 loss = loss_fn(output, y_train.view(-1).long())
                 training_loss.append(loss.item())
 
@@ -889,7 +960,34 @@ class GRNNLearner(FlYMazeAgent):
                 with torch.no_grad():
                     hidden = self.agent.init_hidden(X_val.shape[0]).to(self.device)
                     output = self.agent(X_val.float(), hidden)
-                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    if self.policy_type == "softmax":
+                        output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    elif self.policy_type == "greedy":
+                        output = output.argmax(dim=2).view(-1)
+                    elif self.policy_type == "acceptreject":
+                        output = torch.exp(
+                            torch.stack(
+                                [
+                                    torch.log(output[:, :, 0])
+                                    + torch.log(3 - output[:, :, 1])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                    torch.log(output[:, :, 1])
+                                    + torch.log(3 - output[:, :, 0])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                ],
+                                dim=2,
+                            )
+                        ).view(-1, self.action_space_size)
+                    else:
+                        raise ValueError("Unknown policy type.")
                     val_loss = loss_fn(output, y_val.view(-1).long())
                     validation_loss.append(val_loss.item())
 
@@ -898,7 +996,7 @@ class GRNNLearner(FlYMazeAgent):
                 if epoch % print_every == 0:
                     print("Epoch {}: \tTraining Loss: {:.4f}\tValidation Loss: {:.4f}".format(epoch, loss, val_loss))
                 if early_stopping:
-                    if val_loss < best_val_loss:
+                    if val_loss < best_val_loss - tolerance:
                         best_val_loss = val_loss
                         patience = early_stopping_patience
                         torch.save(
@@ -940,7 +1038,34 @@ class GRNNLearner(FlYMazeAgent):
                 with torch.no_grad():
                     hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
                     output = self.agent(X.float(), hidden)
-                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    if self.policy_type == "softmax":
+                        output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    elif self.policy_type == "greedy":
+                        output = output.argmax(dim=2).view(-1)
+                    elif self.policy_type == "acceptreject":
+                        output = torch.exp(
+                            torch.stack(
+                                [
+                                    torch.log(output[:, :, 0])
+                                    + torch.log(3 - output[:, :, 1])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                    torch.log(output[:, :, 1])
+                                    + torch.log(3 - output[:, :, 0])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                ],
+                                dim=2,
+                            )
+                        ).view(-1, self.action_space_size)
+                    else:
+                        raise ValueError("Unknown policy type.")
                     val_loss = loss_fn(output, y.view(-1).long())
                 if val_loss < best_model_loss:
                     best_model_loss = val_loss
@@ -1018,7 +1143,7 @@ class GFFNN(nn.Module):
         if self.allow_negative_values:
             return q_values
         else:
-            return torch.relu(q_values)
+            return torch.sigmoid(q_values)
 
     def forward_loop(self, inputs):
         """
@@ -1112,7 +1237,7 @@ class GSFFNN(nn.Module):
         if self.allow_negative_values:
             return q_values
         else:
-            return torch.relu(q_values)
+            return torch.sigmoid(q_values)
 
     def forward_loop(self, inputs):
         """
@@ -1233,6 +1358,29 @@ class GQLearner(FlYMazeAgent):
             elif self.policy_type == "greedy":
                 action_probabilities = action_logits[:, -1, :]
                 action = action_probabilities.argmax(dim=1)
+            elif self.policy_type == "acceptreject":
+                action_probabilities = torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(action_logits[:, :, 0])
+                            + torch.log(3 - action_logits[:, :, 1])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                            torch.log(action_logits[:, :, 1])
+                            + torch.log(3 - action_logits[:, :, 0])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                )[:, -1, :]
+                action = torch.multinomial(action_probabilities, 1)
             else:
                 raise ValueError("Unknown policy type: {}".format(self.policy_type))
 
@@ -1270,6 +1418,29 @@ class GQLearner(FlYMazeAgent):
             elif self.policy_type == "greedy":
                 action_probabilities = action_logits.squeeze(0)[-1]
                 action = action_probabilities.argmax().item()
+            elif self.policy_type == "acceptreject":
+                action_probabilities = torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(action_logits[:, :, 0])
+                            + torch.log(3 - action_logits[:, :, 1])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                            torch.log(action_logits[:, :, 1])
+                            + torch.log(3 - action_logits[:, :, 0])
+                            - torch.log(
+                                3 * action_logits[:, :, 1]
+                                + 3 * action_logits[:, :, 0]
+                                - 2 * action_logits[:, :, 0] * action_logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                ).squeeze(0)[-1]
+                action = torch.multinomial(action_probabilities, 1).item()
             else:
                 raise ValueError("Unknown policy type: {}".format(self.policy_type))
 
@@ -1370,6 +1541,7 @@ class GQLearner(FlYMazeAgent):
         weight_decay=1e-5,
         filter_best=True,
         uid=None,
+        tolerance=1e-4,
     ):
         """
         Fit the agent to the data using early stopping
@@ -1388,6 +1560,7 @@ class GQLearner(FlYMazeAgent):
         weight_decay: The weight decay to use for training (float)
         filter_best: Whether or not to filter the best model (bool)
         uid: The unique identifier of the model (str)
+        tolerance: The tolerance for the loss (float)
         """
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
             self.device
@@ -1429,7 +1602,30 @@ class GQLearner(FlYMazeAgent):
                 self.agent.train()
                 optimizer.zero_grad()
                 output = self.agent.forward_loop(X_train.float())
-                output = output.softmax(dim=2).view(-1, self.action_space_size)
+                if self.policy_type == "softmax":
+                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                elif self.policy_type == "greedy":
+                    output = output.argmax(dim=2).view(-1)
+                elif self.policy_type == "acceptreject":
+                    output = torch.exp(
+                        torch.stack(
+                            [
+                                torch.log(output[:, :, 0])
+                                + torch.log(3 - output[:, :, 1])
+                                - torch.log(
+                                    3 * output[:, :, 1] + 3 * output[:, :, 0] - 2 * output[:, :, 0] * output[:, :, 1]
+                                ),
+                                torch.log(output[:, :, 1])
+                                + torch.log(3 - output[:, :, 0])
+                                - torch.log(
+                                    3 * output[:, :, 1] + 3 * output[:, :, 0] - 2 * output[:, :, 0] * output[:, :, 1]
+                                ),
+                            ],
+                            dim=2,
+                        )
+                    ).view(-1, self.action_space_size)
+                else:
+                    raise ValueError("Unknown policy type.")
                 loss = loss_fn(output, y_train.view(-1).long())
                 training_loss.append(loss.item())
 
@@ -1439,7 +1635,34 @@ class GQLearner(FlYMazeAgent):
                 self.agent.eval()
                 with torch.no_grad():
                     output = self.agent.forward_loop(X_val.float())
-                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    if self.policy_type == "softmax":
+                        output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    elif self.policy_type == "greedy":
+                        output = output.argmax(dim=2).view(-1)
+                    elif self.policy_type == "acceptreject":
+                        output = torch.exp(
+                            torch.stack(
+                                [
+                                    torch.log(output[:, :, 0])
+                                    + torch.log(3 - output[:, :, 1])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                    torch.log(output[:, :, 1])
+                                    + torch.log(3 - output[:, :, 0])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                ],
+                                dim=2,
+                            )
+                        ).view(-1, self.action_space_size)
+                    else:
+                        raise ValueError("Unknown policy type.")
                     val_loss = loss_fn(output, y_val.view(-1).long())
                     validation_loss.append(val_loss.item())
 
@@ -1448,7 +1671,7 @@ class GQLearner(FlYMazeAgent):
                 if epoch % print_every == 0:
                     print("Epoch {}: \tTraining Loss: {:.4f}\tValidation Loss: {:.4f}".format(epoch, loss, val_loss))
                 if early_stopping:
-                    if val_loss < best_val_loss:
+                    if val_loss < best_val_loss - tolerance:
                         best_val_loss = val_loss
                         patience = early_stopping_patience
                         torch.save(
@@ -1490,7 +1713,34 @@ class GQLearner(FlYMazeAgent):
                 self.agent.eval()
                 with torch.no_grad():
                     output = self.agent.forward_loop(X.float())
-                    output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    if self.policy_type == "softmax":
+                        output = output.softmax(dim=2).view(-1, self.action_space_size)
+                    elif self.policy_type == "greedy":
+                        output = output.argmax(dim=2).view(-1)
+                    elif self.policy_type == "acceptreject":
+                        output = torch.exp(
+                            torch.stack(
+                                [
+                                    torch.log(output[:, :, 0])
+                                    + torch.log(3 - output[:, :, 1])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                    torch.log(output[:, :, 1])
+                                    + torch.log(3 - output[:, :, 0])
+                                    - torch.log(
+                                        3 * output[:, :, 1]
+                                        + 3 * output[:, :, 0]
+                                        - 2 * output[:, :, 0] * output[:, :, 1]
+                                    ),
+                                ],
+                                dim=2,
+                            )
+                        ).view(-1, self.action_space_size)
+                    else:
+                        raise ValueError("Unknown policy type.")
                     val_loss = loss_fn(output, y.view(-1).long())
                 if val_loss < best_model_loss:
                     best_model_loss = val_loss

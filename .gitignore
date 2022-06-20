@@ -21,3 +21,6 @@ ipython_config.py
 **/scripts/GRNN*
 **/scripts/GQNN*
 **/scripts/model*
+
+# ignore all files with the name full_data.pkl
+**/full_data.pkl

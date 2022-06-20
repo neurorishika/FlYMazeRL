@@ -43,7 +43,7 @@ print("Memory usage: {}".format(full_data.memory_usage(index=True, deep=True)))
 
 print("Saving data...")
 
-# save to compressed dataframe
-full_data.to_csv("results.csv.gz", compression="gzip")
+# save tos dataframe
+full_data.to_csv("full_data.pkl", index=False)
 
 print("Done!")

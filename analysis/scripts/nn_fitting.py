@@ -55,11 +55,14 @@ argument_parser.add_argument("--n_folds", type=int, default=3, help="Number of K
 argument_parser.add_argument("--n_ensemble", type=int, default=100, help="Number of ensemble models to use.")
 argument_parser.add_argument("--history_size", type=int, default=10, help="History size to use.")
 argument_parser.add_argument("--max_epochs", type=int, default=10000, help="Maximum number of epochs to use.")
-argument_parser.add_argument("--early_stopping", type=int, default=50, help="Number of epochs to wait before stopping.")
-argument_parser.add_argument("--learning_rate", type=float, default=0.0005, help="Learning rate to use.")
+argument_parser.add_argument(
+    "--early_stopping", type=int, default=100, help="Number of epochs to wait before stopping."
+)
+argument_parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate to use.")
 argument_parser.add_argument("--weight_decay", type=float, default=1e-5, help="Weight decay to use.")
 argument_parser.add_argument("--print_every", type=int, default=500, help="Number of epochs to wait before printing.")
 argument_parser.add_argument("--train_test_split", type=float, default=0.8, help="Train/test split to use.")
+argument_parser.add_argument("--tolerance", type=float, default=1e-5, help="Tolerance to use validation.")
 
 # Model parameters : GRNN
 argument_parser.add_argument("--reservoir_size", type=int, default=100, help="Reservoir size to use. (Only for GRNN)")
@@ -87,23 +90,23 @@ argument_parser.add_argument(
     "--policy_type",
     type=str,
     default="acceptreject",
-    help="Policy type to use. (options: softmax, egreedy, acceptreject)",
+    help="Policy type to use. (options: softmax, greedy, acceptreject)",
 )
 argument_parser.add_argument(
     "--device", type=str, default="cpu", help="Device to use. (Only for GRNN; options: cpu, cuda)"
 )
 argument_parser.add_argument(
-    "--symmetric", type=str, default='yes', help="Whether to use symmetric or asymmetric networks (yes/no)."
+    "--symmetric", type=str, default="yes", help="Whether to use symmetric or asymmetric networks (yes/no)."
 )
-argument_parser.add_argument("--allow_negative", type=str, default='yes', help="Whether to allow negative Q values.")
+argument_parser.add_argument("--allow_negative", type=str, default="no", help="Whether to allow negative Q values.")
 argument_parser.add_argument(
-    "--omission_is_punishment", type=str, default='no', help="Whether to use omission as a punishment."
+    "--omission_is_punishment", type=str, default="no", help="Whether to use omission as a punishment."
 )
 
 args = argument_parser.parse_args()
 
 # process booleans
-args.symmetric = True if args.symmetric == "yes" else False 
+args.symmetric = True if args.symmetric == "yes" else False
 args.allow_negative = True if args.allow_negative == "yes" else False
 args.omission_is_punishment = True if args.omission_is_punishment == "yes" else False
 
@@ -114,7 +117,7 @@ assert args.policy_type in [
     "softmax",
     "egreedy",
     "acceptreject",
-], "Policy type must be one of: softmax, egreedy, acceptreject"
+], "Policy type must be one of: softmax, greedy, acceptreject"
 assert args.device in ["cpu", "cuda"], "Device must be one of: cpu, cuda"
 assert args.kind in ["RNN", "LSTM", "GRU"], "Kind must be one of: RNN, LSTM, GRU"
 assert args.activation in ["relu", "tanh", "sigmoid"], "Activation function must be one of: relu, tanh, sigmoid"
@@ -216,6 +219,7 @@ fit_params = {
     "print_every": args.print_every,
     "weight_decay": args.weight_decay,
     "filter_best": False,
+    "tolerance": args.tolerance,
 }
 
 # create learner parameters
