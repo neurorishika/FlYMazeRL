@@ -26,6 +26,7 @@ class VanillaRNN(nn.Module):
         use_intermediate_encoder=False,
         encoder_size=None,
         allow_negative_values=True,
+        symmetric=False,
         device="cpu",
     ):
         """
@@ -40,6 +41,8 @@ class VanillaRNN(nn.Module):
         use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
         encoder_size: The number of units in the intermediate encoder (int)
         allow_negative_values: Whether or not to allow negative values in the output (bool)
+        symmetric: Whether or not to use a symmetric RNN (bool)
+        device: The device to use for the RNN (str)
         """
         super(VanillaRNN, self).__init__()
         self.state_size = state_size
@@ -57,89 +60,7 @@ class VanillaRNN(nn.Module):
         self.decoder = nn.Linear(state_size, output_size)
         self.device = device
         self.allow_negative_values = allow_negative_values
-
-    def forward(self, inputs, hidden_state):
-        """
-        Forward pass through the RNN
-        =============================
-
-        Parameters:
-        inputs: The inputs to the RNN (torch.Tensor)
-        hidden_state: The hidden state of the RNN (torch.Tensor)
-
-        Returns:
-        output: The output of the RNN (torch.Tensor)
-        hidden_state: The new hidden state of the RNN (torch.Tensor)
-        """
-        if self.encoder is not None:
-            output, _ = self.rnn(self.encoder(inputs), hidden_state)
-        else:
-            output, _ = self.rnn(inputs, hidden_state)
-        if self.allow_negative_values:
-            output = self.decoder(output)
-        else:
-            output = torch.sigmoid(self.decoder(output))
-        return output
-
-    def init_hidden(self, batch_size):
-        """
-        Initialize the hidden state of the RNN
-        ======================================
-
-        Parameters:
-        batch_size: The batch size of the RNN (int)
-
-        Returns:
-        hidden_state: The hidden state of the RNN (torch.Tensor)
-        """
-        return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
-
-
-class VanillaSRNN(nn.Module):
-    """
-    A class to create a typical Recurrent Neural Network (RNN) with the option to use an intermediate Linear encoder that has been symmetrized.
-    """
-
-    def __init__(
-        self,
-        input_size,
-        state_size,
-        output_size,
-        num_layers,
-        use_intermediate_encoder=False,
-        encoder_size=None,
-        allow_negative_values=True,
-        device="cpu",
-    ):
-        """
-        Initialize the RNN
-        ==================
-
-        Parameters:
-        input_size: The number of inputs to the RNN (int)
-        state_size: The number of hidden units in the RNN (int)
-        output_size: The number of outputs from the RNN (int)
-        num_layers: The number of layers in the RNN (int)
-        use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
-        encoder_size: The number of units in the intermediate encoder (int)
-        allow_negative_values: Whether or not to allow negative values in the output (bool)
-        """
-        super(VanillaSRNN, self).__init__()
-        self.state_size = state_size
-        self.input_size = input_size
-        self.output_size = output_size
-        self.num_layers = num_layers
-        if use_intermediate_encoder:
-            self.encoder = nn.Linear(input_size, encoder_size)
-            self.encoder_size = encoder_size
-            self.rnn = nn.RNN(encoder_size, state_size, num_layers, batch_first=True)
-        else:
-            self.encoder = None
-            self.encoder_size = None
-            self.rnn = nn.RNN(input_size, state_size, num_layers, batch_first=True)
-        self.decoder = nn.Linear(state_size, output_size)
-        self.device = device
-        self.allow_negative_values = allow_negative_values
+        self.symmetric = symmetric
 
     def forward(self, inputs, hidden_state):
         """
@@ -156,19 +77,28 @@ class VanillaSRNN(nn.Module):
         """
         x = inputs
         x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
+
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
         else:
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2])) / 2
-        if self.allow_negative_values:
-            return final_output
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
         else:
-            return torch.sigmoid(final_output)
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = torch.sigmoid(output)
+
+        return output
 
     def init_hidden(self, batch_size):
         """
@@ -198,6 +128,7 @@ class LSTMNN(nn.Module):
         use_intermediate_encoder=False,
         encoder_size=None,
         allow_negative_values=True,
+        symmetric=False,
         device="cpu",
     ):
         """
@@ -211,7 +142,9 @@ class LSTMNN(nn.Module):
         num_layers: The number of layers in the LSTM (int)
         use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
         encoder_size: The number of units in the intermediate encoder (int)
-        allow_negative_values: Whether or not to allow negative values in the output (bool)
+        allow_negative_values: Whether or not to allow negative values in the output (bool)\
+        symmetric: Whether or not to use a symmetric LSTM (bool)
+        device: The device to use for the LSTM (str)
         """
         super(LSTMNN, self).__init__()
         self.state_size = state_size
@@ -229,89 +162,7 @@ class LSTMNN(nn.Module):
         self.decoder = nn.Linear(state_size, output_size)
         self.device = device
         self.allow_negative_values = allow_negative_values
-
-    def forward(self, inputs, hidden_state):
-        """
-        Forward pass through the LSTM
-        =============================
-
-        Parameters:
-        inputs: The inputs to the LSTM (torch.Tensor)
-        hidden_state: The hidden state of the LSTM (torch.Tensor)
-
-        Returns:
-        output: The output of the LSTM (torch.Tensor)
-        hidden_state: The new hidden state of the LSTM (torch.Tensor)
-        """
-        if self.encoder is not None:
-            output, hidden_state = self.rnn(self.encoder(inputs), hidden_state)
-        else:
-            output, hidden_state = self.rnn(inputs, hidden_state)
-        output = self.decoder(output)
-        if self.allow_negative_values:
-            return output
-        else:
-            return torch.sigmoid(output)
-
-    def init_hidden(self, batch_size):
-        """
-        Initialize the hidden state of the LSTM
-        =======================================
-
-        Parameters:
-        batch_size: The batch size of the LSTM (int)
-
-        Returns:
-        hidden_state: The hidden state of the LSTM (torch.Tensor)
-        """
-        return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
-
-
-class LSTMSNN(nn.Module):
-    """
-    A class to create a Long Short-Term Memory (LSTM) RNN with the option to use an intermediate Linear encoder that has been symmetrized.
-    """
-
-    def __init__(
-        self,
-        input_size,
-        state_size,
-        output_size,
-        num_layers,
-        use_intermediate_encoder=False,
-        encoder_size=None,
-        allow_negative_values=True,
-        device="cpu",
-    ):
-        """
-        Initialize the LSTM
-        ===================
-
-        Parameters:
-        input_size: The number of inputs to the LSTM (int)
-        state_size: The number of hidden units in the LSTM (int)
-        output_size: The number of outputs from the LSTM (int)
-        num_layers: The number of layers in the LSTM (int)
-        use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
-        encoder_size: The number of units in the intermediate encoder (int)
-        allow_negative_values: Whether or not to allow negative values in the output (bool)
-        """
-        super(LSTMNN, self).__init__()
-        self.state_size = state_size
-        self.input_size = input_size
-        self.output_size = output_size
-        self.num_layers = num_layers
-        if use_intermediate_encoder:
-            self.encoder = nn.Linear(input_size, encoder_size)
-            self.encoder_size = encoder_size
-            self.rnn = nn.LSTM(encoder_size, state_size, num_layers, batch_first=True)
-        else:
-            self.encoder = None
-            self.encoder_size = None
-            self.rnn = nn.LSTM(input_size, state_size, num_layers, batch_first=True)
-        self.decoder = nn.Linear(state_size, output_size)
-        self.device = device
-        self.allow_negative_values = allow_negative_values
+        self.symmetric = symmetric
 
     def forward(self, inputs, hidden_state):
         """
@@ -328,19 +179,28 @@ class LSTMSNN(nn.Module):
         """
         x = inputs
         x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
+
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
         else:
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2])) / 2
-        if self.allow_negative_values:
-            return final_output
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
         else:
-            return torch.sigmoid(final_output)
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = torch.sigmoid(output)
+
+        return output
 
     def init_hidden(self, batch_size):
         """
@@ -373,6 +233,7 @@ class GRUNN(nn.Module):
         use_intermediate_encoder=False,
         encoder_size=None,
         allow_negative_values=True,
+        symmetric=False,
         device="cpu",
     ):
         """
@@ -387,6 +248,8 @@ class GRUNN(nn.Module):
         use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
         encoder_size: The number of units in the intermediate encoder (int)
         allow_negative_values: Whether or not to allow negative values in the output (bool)
+        symmetric: Whether or not to use a symmetric GRU (bool)
+        device: The device to use for the GRU (str)
         """
         super(GRUNN, self).__init__()
         self.state_size = state_size
@@ -404,89 +267,7 @@ class GRUNN(nn.Module):
         self.decoder = nn.Linear(state_size, output_size)
         self.device = device
         self.allow_negative_values = allow_negative_values
-
-    def forward(self, inputs, hidden_state):
-        """
-        Forward pass through the GRU
-        ============================
-
-        Parameters:
-        inputs: The inputs to the GRU (torch.Tensor)
-        hidden_state: The hidden state of the GRU (torch.Tensor)
-
-        Returns:
-        output: The output of the GRU (torch.Tensor)
-        hidden_state: The new hidden state of the GRU (torch.Tensor)
-        """
-        if self.encoder is not None:
-            output, _ = self.rnn(self.encoder(inputs), hidden_state)
-        else:
-            output, _ = self.rnn(inputs, hidden_state)
-        output = self.decoder(output)
-        if self.allow_negative_values:
-            return output
-        else:
-            return torch.sigmoid(output)
-
-    def init_hidden(self, batch_size):
-        """
-        Initialize the hidden state of the GRU
-        ======================================
-
-        Parameters:
-        batch_size: The batch size of the GRU (int)
-
-        Returns:
-        hidden_state: The hidden state of the GRU (torch.Tensor)
-        """
-        return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
-
-
-class GRUSNN(nn.Module):
-    """
-    A class to create a Gated Recurrent Unit (GRU) RNN with the option to use an intermediate Linear encoder that has been symmetrized.
-    """
-
-    def __init__(
-        self,
-        input_size,
-        state_size,
-        output_size,
-        num_layers,
-        use_intermediate_encoder=False,
-        encoder_size=None,
-        allow_negative_values=True,
-        device="cpu",
-    ):
-        """
-        Initialize the GRU
-        ==================
-
-        Parameters:
-        input_size: The number of inputs to the GRU (int)
-        state_size: The number of hidden units in the GRU (int)
-        output_size: The number of outputs from the GRU (int)
-        num_layers: The number of layers in the GRU (int)
-        use_intermediate_encoder: Whether or not to use an intermediate encoder (bool)
-        encoder_size: The number of units in the intermediate encoder (int)
-        allow_negative_values: Whether or not to allow negative values in the output (bool)
-        """
-        super(GRUNN, self).__init__()
-        self.state_size = state_size
-        self.input_size = input_size
-        self.output_size = output_size
-        self.num_layers = num_layers
-        if use_intermediate_encoder:
-            self.encoder = nn.Linear(input_size, encoder_size)
-            self.encoder_size = encoder_size
-            self.rnn = nn.GRU(encoder_size, state_size, num_layers, batch_first=True)
-        else:
-            self.encoder = None
-            self.encoder_size = None
-            self.rnn = nn.GRU(input_size, state_size, num_layers, batch_first=True)
-        self.decoder = nn.Linear(state_size, output_size)
-        self.device = device
-        self.allow_negative_values = allow_negative_values
+        self.symmetric = symmetric
 
     def forward(self, inputs, hidden_state):
         """
@@ -503,19 +284,28 @@ class GRUSNN(nn.Module):
         """
         x = inputs
         x_ = inputs * torch.tensor([[-1, 1]]).to(self.device)
+
         if self.encoder is not None:
             output, _ = self.rnn(self.encoder(x), hidden_state)
             output_, _ = self.rnn(self.encoder(x_), hidden_state)
         else:
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
-        final_output = (output + torch.flip(output_, dims=[2])) / 2
-        if self.allow_negative_values:
-            return final_output
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
         else:
-            return torch.sigmoid(final_output)
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = torch.sigmoid(output)
+
+        return output
 
     def init_hidden(self, batch_size):
         """
@@ -581,72 +371,41 @@ class GRNNLearner(FlYMazeAgent):
                 model_path is not None
             ), "If you want to use a pre-trained model, you need to specify the path to the model."
 
-        if symmetric_q_function:
-            if kind == "RNN":
-                self.agent = VanillaSRNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            elif kind == "LSTM":
-                self.agent = LSTMSNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            elif kind == "GRU":
-                self.agent = GRUSNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            else:
-                raise ValueError("Unknown RNN kind: {}".format(kind))
+        if kind == "RNN":
+            self.agent = VanillaRNN(
+                2,
+                self.reservoir_size,
+                self.action_space_size,
+                self.num_layers,
+                use_intermediate_encoder=self.encoder_size is not None,
+                encoder_size=self.encoder_size,
+                allow_negative_values=self.allow_negative_values,
+                symmetric=self.symmetric_q_function,
+            ).to(self.device)
+        elif kind == "LSTM":
+            self.agent = LSTMNN(
+                2,
+                self.reservoir_size,
+                self.action_space_size,
+                self.num_layers,
+                use_intermediate_encoder=self.encoder_size is not None,
+                encoder_size=self.encoder_size,
+                allow_negative_values=self.allow_negative_values,
+                symmetric=self.symmetric_q_function,
+            ).to(self.device)
+        elif kind == "GRU":
+            self.agent = GRUNN(
+                2,
+                self.reservoir_size,
+                self.action_space_size,
+                self.num_layers,
+                use_intermediate_encoder=self.encoder_size is not None,
+                encoder_size=self.encoder_size,
+                allow_negative_values=self.allow_negative_values,
+                symmetric=self.symmetric_q_function,
+            ).to(self.device)
         else:
-            if kind == "RNN":
-                self.agent = VanillaRNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            elif kind == "LSTM":
-                self.agent = LSTMNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            elif kind == "GRU":
-                self.agent = GRUNN(
-                    2,
-                    self.reservoir_size,
-                    self.action_space_size,
-                    self.num_layers,
-                    use_intermediate_encoder=self.encoder_size is not None,
-                    encoder_size=self.encoder_size,
-                    allow_negative_values=self.allow_negative_values,
-                ).to(self.device)
-            else:
-                raise ValueError("Unknown RNN kind: {}".format(kind))
+            raise ValueError("Unknown RNN kind: {}".format(kind))
 
         if pre_trained:
             self.agent.load_state_dict(torch.load(model_path))
@@ -1098,6 +857,7 @@ class GFFNN(nn.Module):
         device="cpu",
         activation="relu",
         allow_negative_values=False,
+        symmetric=False,
     ):
         """
         Initialize the network
@@ -1117,93 +877,7 @@ class GFFNN(nn.Module):
         self.layers.append(nn.Linear(hidden_state_sizes[-1], self.action_space_size))
         self.activation = activation
         self.allow_negative_values = allow_negative_values
-        self.device = device
-
-    def forward(self, input, q_value):
-        """
-        Forward pass of the network
-        ===========================
-
-        Parameters:
-        input: The input to the network (torch.Tensor)
-        q_value: The q value of the action (torch.Tensor)
-        """
-        x = torch.cat((input, q_value), dim=1)
-        for layer in self.layers[:-1]:
-            if self.activation == "relu":
-                x = torch.relu(layer(x))
-            elif self.activation == "tanh":
-                x = torch.tanh(layer(x))
-            elif self.activation == "sigmoid":
-                x = torch.sigmoid(layer(x))
-            else:
-                raise ValueError("Invalid activation function")
-        q_values = self.layers[-1](x)
-
-        if self.allow_negative_values:
-            return q_values
-        else:
-            return torch.sigmoid(q_values)
-
-    def forward_loop(self, inputs):
-        """
-        Full forward pass of the network over time
-        ==========================================
-
-        Parameters:
-        inputs: The inputs to the network (torch.Tensor)
-        """
-        q_value = self.init_qvalue(inputs.shape[0])
-        q_values = q_value.unsqueeze(1)
-        n_trials = inputs.shape[1]
-        for i in range(n_trials):
-            q_value = self.forward(inputs[:, i, :], q_value)
-            q_values = torch.concat([q_values, q_value.unsqueeze(1)], dim=1)
-        return q_values
-
-    def init_qvalue(self, batch_size):
-        """
-        Initialize the q value of the network
-        ======================================
-
-        Parameters:
-        batch_size: The size of the batch (int)
-        """
-        return torch.zeros(batch_size, self.action_space_size).to(self.device)
-
-
-class GSFFNN(nn.Module):
-    """
-    A class to create a Generalized Symmetrized Feedforward Q function approximation network
-    """
-
-    def __init__(
-        self,
-        input_size,
-        hidden_state_sizes,
-        action_space_size,
-        device="cpu",
-        activation="relu",
-        allow_negative_values=False,
-    ):
-        """
-        Initialize the network
-        ======================
-
-        Parameters:
-        input_size: The size of the input to the network (int)
-        hidden_state_sizes: The sizes of the hidden layers (list of ints)
-        action_space_size: The size of the action space (int)
-        """
-        super(GSFFNN, self).__init__()
-        self.num_layers = len(hidden_state_sizes)
-        self.input_size = input_size + action_space_size
-        self.action_space_size = action_space_size
-        self.layers = nn.ModuleList([nn.Linear(self.input_size, hidden_state_sizes[0])])
-        self.layers.extend([nn.Linear(h1, h2) for h1, h2 in zip(hidden_state_sizes, hidden_state_sizes[1:])])
-        self.layers.append(nn.Linear(hidden_state_sizes[-1], self.action_space_size))
-        self.activation = activation
-        self.allow_negative_values = allow_negative_values
+        self.symmetric = symmetric
         self.device = device
 
     def forward(self, input, q_value):
@@ -1232,7 +906,11 @@ class GSFFNN(nn.Module):
                 x_ = torch.sigmoid(layer(x_))
             else:
                 raise ValueError("Invalid activation function")
-        q_values = (self.layers[-1](x) + torch.flip(self.layers[-1](x_), dims=(1,))) / 2
+
+        if self.symmetric:
+            q_values = (self.layers[-1](x) + torch.flip(self.layers[-1](x_), dims=(1,))) / 2
+        else:
+            q_values = self.layers[-1](x)
 
         if self.allow_negative_values:
             return q_values
@@ -1263,7 +941,7 @@ class GSFFNN(nn.Module):
         Parameters:
         batch_size: The size of the batch (int)
         """
-        return torch.zeros(batch_size, self.action_space_size).to(self.device)
+        return 0.5 * torch.ones(batch_size, self.action_space_size).to(self.device)
 
 
 class GQLearner(FlYMazeAgent):
@@ -1308,24 +986,15 @@ class GQLearner(FlYMazeAgent):
         self.symmetric_q_function = symmetric_q_function
         self.allow_negative_values = allow_negative_values
 
-        if self.symmetric_q_function:
-            self.agent = GSFFNN(
-                2,
-                hidden_state_sizes,
-                self.action_space_size,
-                self.device,
-                activation=self.activation,
-                allow_negative_values=self.allow_negative_values,
-            ).to(self.device)
-        else:
-            self.agent = GFFNN(
-                input_size=2,
-                hidden_state_sizes=hidden_state_sizes,
-                action_space_size=self.action_space_size,
-                device=self.device,
-                activation=activation,
-                allow_negative_values=self.allow_negative_values,
-            ).to(self.device)
+        self.agent = GFFNN(
+            input_size=2,
+            hidden_state_sizes=hidden_state_sizes,
+            action_space_size=self.action_space_size,
+            device=self.device,
+            activation=activation,
+            allow_negative_values=self.allow_negative_values,
+            symmetric=self.symmetric_q_function,
+        ).to(self.device)
 
         if pre_trained:
             self.agent.load_state_dict(torch.load(model_path))
