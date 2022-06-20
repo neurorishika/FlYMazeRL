@@ -58,7 +58,7 @@ argument_parser.add_argument("--max_epochs", type=int, default=10000, help="Maxi
 argument_parser.add_argument(
     "--early_stopping", type=int, default=100, help="Number of epochs to wait before stopping."
 )
-argument_parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate to use.")
+argument_parser.add_argument("--learning_rate", type=float, default=1e-5, help="Learning rate to use.")
 argument_parser.add_argument("--weight_decay", type=float, default=1e-5, help="Weight decay to use.")
 argument_parser.add_argument("--print_every", type=int, default=500, help="Number of epochs to wait before printing.")
 argument_parser.add_argument("--train_test_split", type=float, default=0.8, help="Train/test split to use.")
