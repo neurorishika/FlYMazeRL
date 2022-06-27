@@ -24,3 +24,6 @@ ipython_config.py
 
 # ignore all files with the name full_data.pkl
 **/full_data.pkl
+
+# ignore all files with the name softmax_GQNN_value_fields.npz
+**/softmax_GQNN_value_fields.npz
