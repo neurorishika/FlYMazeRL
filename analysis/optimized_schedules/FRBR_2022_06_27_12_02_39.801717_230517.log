@@ -1,0 +1,39 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Optimizing agent: ForgettingRewardLearner_acceptreject
+
+Arguments:
+===========
+exit_on_completion: True
+save_path: ../optimized_schedules/
+save_intermediate: True
+agent: FRBR
+n_trials_per_session: 100
+reward_fraction: 0.5
+n_replicates: 2
+optimization_method: genetic
+early_stopping: True
+early_stopping_patience: 10
+initialization_method: random
+n_agents: 1000
+parallelize: False
+n_generations: 200
+m: 20
+population_size: 100
+fitness_function: bias
+independent_shuffles: True
+reference_agent: CQES
+
+
+Replicate 1/2:Best fitness = 0.54423
+Replicate 2/2:Best fitness = 0.54335
