@@ -26,6 +26,8 @@ Install Instructions for flymazerl package (Python 3.9 or higher):
         pip install gym
     7. Install the FlyMazeRL package locally:
         pip install -e .
+    8. Create environment variable for the FlyMazeRL package:
+        set FLYMAZERL_PATH=<path to the FlyMazeRL package>
 
 
     

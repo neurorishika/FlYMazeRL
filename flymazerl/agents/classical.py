@@ -3,7 +3,6 @@ import theano
 import theano.tensor as tt
 import pymc3 as pm
 import arviz as az
-from torch import sigmoid
 
 from flymazerl.agents.base import FlYMazeAgent
 
@@ -134,6 +133,7 @@ This package contains classical Reinforcement Learning agents for the flymazerl 
         - OSCQLearner_esoftmax: uses epsilon-softmax policy to select actions
             Parameters: alpha, theta, gamma, beta, epsilon
 """
+
 
 class RewardLearner(FlYMazeAgent):
     def init_variables(self, alpha=0.1):
@@ -416,7 +416,7 @@ class RewardLearner_softmax(RewardLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -570,7 +570,7 @@ class RewardLearner_esoftmax(RewardLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -732,13 +732,24 @@ class RewardLearner_acceptreject(RewardLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha):
@@ -788,8 +799,12 @@ class RewardLearner_acceptreject(RewardLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -838,8 +853,9 @@ class RewardLearner_acceptreject(RewardLearner):
         with pm.Model() as model:  # define model
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
-
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, weight, intercept, actions_set, rewards_set
@@ -949,9 +965,9 @@ class ForgettingRewardLearner(FlYMazeAgent):
         new_state: new state (int)
         reward: reward received (float)
         """
-        self.q_table[state, :action] = (1-self.alpha) * self.q_table[state, :action]
+        self.q_table[state, :action] = (1 - self.alpha) * self.q_table[state, :action]
         self.q_table[state, action] = self.q_table[state, action] + self.alpha * reward  # update Q-table
-        self.q_table[new_state, action + 1:] = (1-self.alpha) * self.q_table[new_state, action + 1:]
+        self.q_table[new_state, action + 1 :] = (1 - self.alpha) * self.q_table[new_state, action + 1 :]
 
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
@@ -1025,9 +1041,9 @@ class ForgettingRewardLearner_egreedy(ForgettingRewardLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[:action], (1-alpha) * Qs[:action])
+        Qs = tt.set_subtensor(Qs[:action], (1 - alpha) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1-alpha) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - alpha) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, epsilon, actions_set, rewards_set):
@@ -1157,7 +1173,7 @@ class ForgettingRewardLearner_softmax(ForgettingRewardLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -1178,9 +1194,9 @@ class ForgettingRewardLearner_softmax(ForgettingRewardLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[:action], (1-alpha) * Qs[:action])
+        Qs = tt.set_subtensor(Qs[:action], (1 - alpha) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1-alpha) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - alpha) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, beta, actions_set, rewards_set):
@@ -1313,7 +1329,7 @@ class ForgettingRewardLearner_esoftmax(ForgettingRewardLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -1338,9 +1354,9 @@ class ForgettingRewardLearner_esoftmax(ForgettingRewardLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[:action], (1-alpha) * Qs[:action])
+        Qs = tt.set_subtensor(Qs[:action], (1 - alpha) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1-alpha) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - alpha) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, beta, epsilon, actions_set, rewards_set):
@@ -1477,13 +1493,24 @@ class ForgettingRewardLearner_acceptreject(ForgettingRewardLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha):
@@ -1501,9 +1528,9 @@ class ForgettingRewardLearner_acceptreject(ForgettingRewardLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[:action], (1-alpha) * Qs[:action])
+        Qs = tt.set_subtensor(Qs[:action], (1 - alpha) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1-alpha) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - alpha) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, weight, intercept, actions_set, rewards_set):
@@ -1535,8 +1562,12 @@ class ForgettingRewardLearner_acceptreject(ForgettingRewardLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -1585,8 +1616,9 @@ class ForgettingRewardLearner_acceptreject(ForgettingRewardLearner):
         with pm.Model() as model:  # define model
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
-
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, weight, intercept, actions_set, rewards_set
@@ -1900,7 +1932,7 @@ class IQLearner_softmax(IQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -2054,7 +2086,7 @@ class IQLearner_esoftmax(IQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -2216,13 +2248,24 @@ class IQLearner_acceptreject(IQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha):
@@ -2272,8 +2315,12 @@ class IQLearner_acceptreject(IQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -2322,8 +2369,9 @@ class IQLearner_acceptreject(IQLearner):
         with pm.Model() as model:  # define model
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
-
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, weight, intercept, actions_set, rewards_set
@@ -2643,7 +2691,7 @@ class FQLearner_softmax(FQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -2798,7 +2846,7 @@ class FQLearner_esoftmax(FQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -2961,13 +3009,24 @@ class FQLearner_acceptreject(FQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha):
@@ -3018,8 +3077,12 @@ class FQLearner_acceptreject(FQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -3068,7 +3131,9 @@ class FQLearner_acceptreject(FQLearner):
         with pm.Model() as model:  # define model
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, weight, intercept, actions_set, rewards_set
@@ -3183,7 +3248,7 @@ class DFQLearner(FlYMazeAgent):
         """
         self.q_table[state, :action] = (1 - self.kappa) * self.q_table[state, :action]
         self.q_table[state, action] = (1 - self.alpha) * self.q_table[state, action] + self.alpha * reward
-        self.q_table[state, action+1:] = (1 - self.kappa) * self.q_table[state, action+1:]
+        self.q_table[state, action + 1 :] = (1 - self.kappa) * self.q_table[state, action + 1 :]
 
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
@@ -3260,7 +3325,7 @@ class DFQLearner_egreedy(DFQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1 - kappa) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, epsilon, actions_set, rewards_set):
@@ -3394,7 +3459,7 @@ class DFQLearner_softmax(DFQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -3418,7 +3483,7 @@ class DFQLearner_softmax(DFQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1 - kappa) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, beta, actions_set, rewards_set):
@@ -3556,7 +3621,7 @@ class DFQLearner_esoftmax(DFQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -3584,7 +3649,7 @@ class DFQLearner_esoftmax(DFQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1 - kappa) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, beta, epsilon, actions_set, rewards_set):
@@ -3726,13 +3791,24 @@ class DFQLearner_acceptreject(DFQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, kappa):
@@ -3753,7 +3829,7 @@ class DFQLearner_acceptreject(DFQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * reward)
-        Qs = tt.set_subtensor(Qs[action + 1:], (1 - kappa) * Qs[action + 1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, weight, intercept, actions_set, rewards_set):
@@ -3786,8 +3862,12 @@ class DFQLearner_acceptreject(DFQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -3839,7 +3919,9 @@ class DFQLearner_acceptreject(DFQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             kappa = pm.Beta("kappa", kappa_params[0], kappa_params[1])  # forgetting rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, kappa, weight, intercept, actions_set, rewards_set
@@ -3955,7 +4037,7 @@ class DEQLearner(FlYMazeAgent):
         if reward != 0:
             self.q_table[state, action] += self.alpha * (reward - self.q_table[state, action])
         else:
-            self.q_table[state, action] *= (1 - self.tau)
+            self.q_table[state, action] *= 1 - self.tau
 
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
@@ -4030,7 +4112,9 @@ class DEQLearner_egreedy(DEQLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0) - alpha*tt.neq(reward,0)) * Qs[action] + alpha * reward)
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action] + alpha * reward
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, epsilon, actions_set, rewards_set):
@@ -4164,7 +4248,7 @@ class DEQLearner_softmax(DEQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -4186,7 +4270,9 @@ class DEQLearner_softmax(DEQLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0) - alpha*tt.neq(reward,0)) * Qs[action] + alpha * reward)
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action] + alpha * reward
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, beta, actions_set, rewards_set):
@@ -4324,7 +4410,7 @@ class DEQLearner_esoftmax(DEQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -4350,7 +4436,9 @@ class DEQLearner_esoftmax(DEQLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0) - alpha*tt.neq(reward,0)) * Qs[action] + alpha * reward)
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action] + alpha * reward
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, beta, epsilon, actions_set, rewards_set):
@@ -4492,13 +4580,24 @@ class DEQLearner_acceptreject(DEQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, tau):
@@ -4517,7 +4616,9 @@ class DEQLearner_acceptreject(DEQLearner):
         Returns:
         Qs: updated Q-value (Theano tensor)
         """
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0) - alpha*tt.neq(reward,0)) * Qs[action] + alpha * reward)
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action] + alpha * reward
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, weight, intercept, actions_set, rewards_set):
@@ -4550,8 +4651,12 @@ class DEQLearner_acceptreject(DEQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -4603,7 +4708,9 @@ class DEQLearner_acceptreject(DEQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             tau = pm.Beta("tau", tau_params[0], tau_params[1])  # extinction rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, tau, weight, intercept, actions_set, rewards_set
@@ -4749,8 +4856,12 @@ class HQLearner(FlYMazeAgent):
             self.r_history.append([self.r_table[0, 0], self.r_table[0, 1]])
             self.h_history.append([self.h_table[0, 0], self.h_table[0, 1]])
             self.w_history.append(self.w)
-            self.q_history.append([self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
-                                      self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1]])
+            self.q_history.append(
+                [
+                    self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
+                    self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1],
+                ]
+            )
 
     def run_episode(self):
         """
@@ -5281,19 +5392,7 @@ class HQLearner_esoftmax(HQLearner):
         return action, action_probabilities
 
     def vectorizedUpdate(
-        self,
-        action,
-        reward,
-        tables,
-        alpha_r,
-        alpha_h,
-        weight_r,
-        weight_h,
-        weight_b,
-        theta_r,
-        theta_h,
-        beta,
-        epsilon,
+        self, action, reward, tables, alpha_r, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, beta, epsilon,
     ):
         """
         Vectorized update of Q-table using Habitual Q-Learning model
@@ -5347,18 +5446,7 @@ class HQLearner_esoftmax(HQLearner):
         return tt.concatenate([tables[: 2 * self.action_space_size], tt.reshape(w, (1,))])
 
     def vectorizedActionProbabilities(
-        self,
-        alpha_r,
-        alpha_h,
-        weight_r,
-        weight_h,
-        weight_b,
-        theta_r,
-        theta_h,
-        beta,
-        epsilon,
-        actions_set,
-        rewards_set,
+        self, alpha_r, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, beta, epsilon, actions_set, rewards_set,
     ):
         """
         Vectorized action probabilities for second alternative
@@ -5549,15 +5637,26 @@ class HQLearner_acceptreject(HQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
 
         q_table = self.w * self.theta_r * self.r_table[state, :] + (1 - self.w) * self.theta_h * self.h_table[state, :]
         accept_probabilities = sigmoid(self.weight * q_table + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action_probabilities = np.array([1-action_1_probability, action_1_probability])
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action_probabilities = np.array([1 - action_1_probability, action_1_probability])
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action, action_probabilities
 
     def vectorizedUpdate(
@@ -5612,11 +5711,13 @@ class HQLearner_acceptreject(HQLearner):
             * theta_h
             * tables[self.action_space_size : 2 * self.action_space_size]
         )
-        Ds_ = 1/(1 + tt.exp(-(weight * Ds + intercept)))
-        pDs = tt.stack([ 
-            Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-            Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-        ])
+        Ds_ = 1 / (1 + tt.exp(-(weight * Ds + intercept)))
+        pDs = tt.stack(
+            [
+                Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+                Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+            ]
+        )
 
         g = tt.dot(pDs, tt.abs_((tables[: self.action_space_size] - tt.dot(pDs, tables[: self.action_space_size]))))
         h = tt.sum(
@@ -5689,9 +5790,13 @@ class HQLearner_acceptreject(HQLearner):
             Hs_ = Hs_[:-1]
             w_ = tt.concatenate([[0.5 * tt.ones((self.action_space_size), dtype="float64")], w], axis=0)
             w_ = w_[:-1]
-            Ds_ = (w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_)
-            Ds_ = 1/(1 + tt.exp(-(weight * Ds_ + intercept)))
-            log_prob_action1 = tt.log(Ds_[:,1]) + tt.log(3-Ds_[:,0]) - tt.log(3*Ds_[:,1] + 3*Ds_[:,0] - 2*Ds_[:,0]*Ds_[:,1])
+            Ds_ = w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_
+            Ds_ = 1 / (1 + tt.exp(-(weight * Ds_ + intercept)))
+            log_prob_action1 = (
+                tt.log(Ds_[:, 1])
+                + tt.log(3 - Ds_[:, 0])
+                - tt.log(3 * Ds_[:, 1] + 3 * Ds_[:, 0] - 2 * Ds_[:, 0] * Ds_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action1))
@@ -5920,8 +6025,12 @@ class FHQLearner(FlYMazeAgent):
             self.r_history.append([self.r_table[0, 0], self.r_table[0, 1]])
             self.h_history.append([self.h_table[0, 0], self.h_table[0, 1]])
             self.w_history.append(self.w)
-            self.q_history.append([self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
-                                      self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1]])
+            self.q_history.append(
+                [
+                    self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
+                    self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1],
+                ]
+            )
 
     def run_episode(self):
         """
@@ -6011,13 +6120,8 @@ class FHQLearner_egreedy(FHQLearner):
         Returns:
         tables: updated value tables (Theano tensor)
         """
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action], tables[action] + alpha_r * reward,
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * reward,)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -6247,13 +6351,8 @@ class FHQLearner_softmax(FHQLearner):
         Returns:
         tables: updated value tables (Theano tensor)
         """
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action], tables[action] + alpha_r * reward,
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * reward,)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -6464,19 +6563,7 @@ class FHQLearner_esoftmax(FHQLearner):
         return action, action_probabilities
 
     def vectorizedUpdate(
-        self,
-        action,
-        reward,
-        tables,
-        alpha_r,
-        alpha_h,
-        weight_r,
-        weight_h,
-        weight_b,
-        theta_r,
-        theta_h,
-        beta,
-        epsilon,
+        self, action, reward, tables, alpha_r, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, beta, epsilon,
     ):
         """
         Vectorized update of Q-table using Forgetting Habitual Q-Learning model
@@ -6499,13 +6586,8 @@ class FHQLearner_esoftmax(FHQLearner):
         tables: updated value tables (Theano tensor)
         """
 
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action], tables[action] + alpha_r * reward,
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * reward,)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -6536,18 +6618,7 @@ class FHQLearner_esoftmax(FHQLearner):
         return tt.concatenate([tables[: 2 * self.action_space_size], tt.reshape(w, (1,))])
 
     def vectorizedActionProbabilities(
-        self,
-        alpha_r,
-        alpha_h,
-        weight_r,
-        weight_h,
-        weight_b,
-        theta_r,
-        theta_h,
-        beta,
-        epsilon,
-        actions_set,
-        rewards_set,
+        self, alpha_r, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, beta, epsilon, actions_set, rewards_set,
     ):
         """
         Vectorized action probabilities for second alternative
@@ -6738,15 +6809,26 @@ class FHQLearner_acceptreject(FHQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
 
         q_table = self.w * self.theta_r * self.r_table[state, :] + (1 - self.w) * self.theta_h * self.h_table[state, :]
         accept_probabilities = sigmoid(self.weight * q_table + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action_probabilities = np.array([1-action_1_probability, action_1_probability])
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action_probabilities = np.array([1 - action_1_probability, action_1_probability])
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action, action_probabilities
 
     def vectorizedUpdate(
@@ -6786,13 +6868,8 @@ class FHQLearner_acceptreject(FHQLearner):
         tables: updated value tables (Theano tensor)
         """
 
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action], tables[action] + alpha_r * reward,
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * reward,)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -6807,11 +6884,13 @@ class FHQLearner_acceptreject(FHQLearner):
             * theta_h
             * tables[self.action_space_size : 2 * self.action_space_size]
         )
-        Ds_ = 1/(1 + tt.exp(-(weight * Ds + intercept)))
-        pDs = tt.stack([ 
-            Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-            Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-        ])
+        Ds_ = 1 / (1 + tt.exp(-(weight * Ds + intercept)))
+        pDs = tt.stack(
+            [
+                Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+                Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+            ]
+        )
 
         g = tt.dot(pDs, tt.abs_((tables[: self.action_space_size] - tt.dot(pDs, tables[: self.action_space_size]))))
         h = tt.sum(
@@ -6884,9 +6963,13 @@ class FHQLearner_acceptreject(FHQLearner):
             Hs_ = Hs_[:-1]
             w_ = tt.concatenate([[0.5 * tt.ones((self.action_space_size), dtype="float64")], w], axis=0)
             w_ = w_[:-1]
-            Ds_ = (w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_)
-            Ds_ = 1/(1 + tt.exp(-(weight * Ds_ + intercept)))
-            log_prob_action1 = tt.log(Ds_[:,1]) + tt.log(3-Ds_[:,0]) - tt.log(3*Ds_[:,1] + 3*Ds_[:,0] - 2*Ds_[:,0]*Ds_[:,1])
+            Ds_ = w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_
+            Ds_ = 1 / (1 + tt.exp(-(weight * Ds_ + intercept)))
+            log_prob_action1 = (
+                tt.log(Ds_[:, 1])
+                + tt.log(3 - Ds_[:, 0])
+                - tt.log(3 * Ds_[:, 1] + 3 * Ds_[:, 0] - 2 * Ds_[:, 0] * Ds_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action1))
@@ -7292,7 +7375,7 @@ class OSQLearner_softmax(OSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -7450,7 +7533,7 @@ class OSQLearner_esoftmax(OSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -7615,13 +7698,24 @@ class OSQLearner_acceptreject(OSQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, theta):
@@ -7671,8 +7765,12 @@ class OSQLearner_acceptreject(OSQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -7724,7 +7822,9 @@ class OSQLearner_acceptreject(OSQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, theta, weight, intercept, actions_set, rewards_set
@@ -8048,7 +8148,7 @@ class FOSQLearner_softmax(FOSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -8207,7 +8307,7 @@ class FOSQLearner_esoftmax(FOSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -8373,13 +8473,24 @@ class FOSQLearner_acceptreject(FOSQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, theta):
@@ -8430,8 +8541,12 @@ class FOSQLearner_acceptreject(FOSQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -8483,7 +8598,9 @@ class FOSQLearner_acceptreject(FOSQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, theta, weight, intercept, actions_set, rewards_set
@@ -8600,8 +8717,10 @@ class DFOSQLearner(FlYMazeAgent):
         reward: reward received (float)
         """
         self.q_table[state, :action] = (1 - self.kappa) * self.q_table[state, :action]
-        self.q_table[state, action] = (1-self.alpha) * self.q_table[state, action] +  self.alpha * (reward + self.theta * (reward == 0))  # update Q-table
-        self.q_table[new_state, action+1:] = (1 - self.kappa) * self.q_table[new_state, action+1:]
+        self.q_table[state, action] = (1 - self.alpha) * self.q_table[state, action] + self.alpha * (
+            reward + self.theta * (reward == 0)
+        )  # update Q-table
+        self.q_table[new_state, action + 1 :] = (1 - self.kappa) * self.q_table[new_state, action + 1 :]
 
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
@@ -8679,7 +8798,7 @@ class DFOSQLearner_egreedy(DFOSQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0)))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, epsilon, actions_set, rewards_set):
@@ -8705,7 +8824,10 @@ class DFOSQLearner_egreedy(DFOSQLearner):
             # Compute the Qs values
             Qs = tt.zeros((2), dtype="float64")
             Qs, _ = theano.scan(
-                fn=self.vectorizedUpdate, sequences=[actions, rewards], outputs_info=[Qs], non_sequences=[alpha, kappa, theta]
+                fn=self.vectorizedUpdate,
+                sequences=[actions, rewards],
+                outputs_info=[Qs],
+                non_sequences=[alpha, kappa, theta],
             )
 
             # Compute the action probabilities
@@ -8816,7 +8938,7 @@ class DFOSQLearner_softmax(DFOSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -8841,7 +8963,7 @@ class DFOSQLearner_softmax(DFOSQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0)))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, beta, actions_set, rewards_set):
@@ -8867,7 +8989,10 @@ class DFOSQLearner_softmax(DFOSQLearner):
             # Compute the Qs values
             Qs = tt.zeros((2), dtype="float64")
             Qs, _ = theano.scan(
-                fn=self.vectorizedUpdate, sequences=[actions, rewards], outputs_info=[Qs], non_sequences=[alpha, kappa, theta]
+                fn=self.vectorizedUpdate,
+                sequences=[actions, rewards],
+                outputs_info=[Qs],
+                non_sequences=[alpha, kappa, theta],
             )
 
             # Compute the action probabilities
@@ -8980,7 +9105,7 @@ class DFOSQLearner_esoftmax(DFOSQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -9008,7 +9133,7 @@ class DFOSQLearner_esoftmax(DFOSQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0)))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, beta, epsilon, actions_set, rewards_set):
@@ -9036,7 +9161,10 @@ class DFOSQLearner_esoftmax(DFOSQLearner):
             # Compute the Qs values
             Qs = tt.zeros((2), dtype="float64")
             Qs, _ = theano.scan(
-                fn=self.vectorizedUpdate, sequences=[actions, rewards], outputs_info=[Qs], non_sequences=[alpha, kappa, theta]
+                fn=self.vectorizedUpdate,
+                sequences=[actions, rewards],
+                outputs_info=[Qs],
+                non_sequences=[alpha, kappa, theta],
             )
 
             # Compute the action probabilities
@@ -9152,13 +9280,24 @@ class DFOSQLearner_acceptreject(DFOSQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, kappa, theta):
@@ -9179,7 +9318,7 @@ class DFOSQLearner_acceptreject(DFOSQLearner):
         """
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0)))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, weight, intercept, actions_set, rewards_set):
@@ -9206,13 +9345,20 @@ class DFOSQLearner_acceptreject(DFOSQLearner):
             # Compute the Qs values
             Qs = tt.zeros((2), dtype="float64")
             Qs, _ = theano.scan(
-                fn=self.vectorizedUpdate, sequences=[actions, rewards], outputs_info=[Qs], non_sequences=[alpha, kappa, theta]
+                fn=self.vectorizedUpdate,
+                sequences=[actions, rewards],
+                outputs_info=[Qs],
+                non_sequences=[alpha, kappa, theta],
             )
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -9267,7 +9413,9 @@ class DFOSQLearner_acceptreject(DFOSQLearner):
             kappa = pm.Beta("kappa", kappa_params[0], kappa_params[1])  # forgetting rate (beta distribution)
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, kappa, theta, weight, intercept, actions_set, rewards_set
@@ -9588,7 +9736,7 @@ class CQLearner_softmax(CQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -9747,7 +9895,7 @@ class CQLearner_esoftmax(CQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -9913,13 +10061,24 @@ class CQLearner_acceptreject(CQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, gamma):
@@ -9969,8 +10128,12 @@ class CQLearner_acceptreject(CQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -10022,7 +10185,9 @@ class CQLearner_acceptreject(CQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, gamma, weight, intercept, actions_set, rewards_set
@@ -10349,7 +10514,7 @@ class FCQLearner_softmax(FCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -10509,7 +10674,7 @@ class FCQLearner_esoftmax(FCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -10676,13 +10841,24 @@ class FCQLearner_acceptreject(FCQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, gamma):
@@ -10734,8 +10910,12 @@ class FCQLearner_acceptreject(FCQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -10787,7 +10967,9 @@ class FCQLearner_acceptreject(FCQLearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, gamma, weight, intercept, actions_set, rewards_set
@@ -10903,10 +11085,12 @@ class DFCQLearner(FlYMazeAgent):
         new_state: new state (int)
         reward: reward received (float)
         """
-        next_best = np.max(self.q_table[new_state, :]) 
+        next_best = np.max(self.q_table[new_state, :])
         self.q_table[state, :action] = (1 - self.kappa) * self.q_table[state, :action]
-        self.q_table[state, action] =(1 - self.alpha) * self.q_table[state, action] +  self.alpha * (reward + self.gamma * next_best)
-        self.q_table[state, action + 1:] = (1 - self.kappa) * self.q_table[state, action + 1:]
+        self.q_table[state, action] = (1 - self.alpha) * self.q_table[state, action] + self.alpha * (
+            reward + self.gamma * next_best
+        )
+        self.q_table[state, action + 1 :] = (1 - self.kappa) * self.q_table[state, action + 1 :]
 
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
@@ -10985,7 +11169,7 @@ class DFCQLearner_egreedy(DFCQLearner):
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, gamma, epsilon, actions_set, rewards_set):
@@ -11126,7 +11310,7 @@ class DFCQLearner_softmax(DFCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -11152,7 +11336,7 @@ class DFCQLearner_softmax(DFCQLearner):
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, gamma, beta, actions_set, rewards_set):
@@ -11295,7 +11479,7 @@ class DFCQLearner_esoftmax(DFCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -11324,7 +11508,7 @@ class DFCQLearner_esoftmax(DFCQLearner):
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, gamma, beta, epsilon, actions_set, rewards_set):
@@ -11471,13 +11655,24 @@ class DFCQLearner_acceptreject(DFCQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, kappa, gamma):
@@ -11499,7 +11694,7 @@ class DFCQLearner_acceptreject(DFCQLearner):
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
         Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, gamma, weight, intercept, actions_set, rewards_set):
@@ -11535,8 +11730,12 @@ class DFCQLearner_acceptreject(DFCQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -11591,7 +11790,9 @@ class DFCQLearner_acceptreject(DFCQLearner):
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             kappa = pm.Beta("kappa", kappa_params[0], kappa_params[1])  # forgetting rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, kappa, gamma, weight, intercept, actions_set, rewards_set
@@ -11707,7 +11908,7 @@ class DECQLearner(FlYMazeAgent):
         new_state: new state (int)
         reward: reward received (float)
         """
-        next_best = np.max(self.q_table[new_state, :]) 
+        next_best = np.max(self.q_table[new_state, :])
         self.q_table[state, :] = (1 - self.tau) * self.q_table[state, :]
         self.q_table[state, action] += self.alpha * (reward + self.gamma * next_best)
 
@@ -11786,7 +11987,11 @@ class DECQLearner_egreedy(DECQLearner):
         Qs: updated Q-value (Theano tensor)
         """
         next_best = tt.max(Qs)
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0)-alpha*tt.neq(reward,0)) * Qs[action] + alpha * (reward + gamma * next_best))
+        Qs = tt.set_subtensor(
+            Qs[action],
+            (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action]
+            + alpha * (reward + gamma * next_best),
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, gamma, epsilon, actions_set, rewards_set):
@@ -11927,7 +12132,7 @@ class DECQLearner_softmax(DECQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -11951,7 +12156,11 @@ class DECQLearner_softmax(DECQLearner):
         Qs: updated Q-value (Theano tensor)
         """
         next_best = tt.max(Qs)
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0)-alpha*tt.neq(reward,0)) * Qs[action] + alpha * (reward + gamma * next_best))
+        Qs = tt.set_subtensor(
+            Qs[action],
+            (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action]
+            + alpha * (reward + gamma * next_best),
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, gamma, beta, actions_set, rewards_set):
@@ -12094,7 +12303,7 @@ class DECQLearner_esoftmax(DECQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -12121,7 +12330,11 @@ class DECQLearner_esoftmax(DECQLearner):
         Qs: updated Q-value (Theano tensor)
         """
         next_best = tt.max(Qs)
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0)-alpha*tt.neq(reward,0)) * Qs[action] + alpha * (reward + gamma * next_best))
+        Qs = tt.set_subtensor(
+            Qs[action],
+            (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action]
+            + alpha * (reward + gamma * next_best),
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, gamma, beta, epsilon, actions_set, rewards_set):
@@ -12268,13 +12481,24 @@ class DECQLearner_acceptreject(DECQLearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, tau, gamma):
@@ -12294,7 +12518,11 @@ class DECQLearner_acceptreject(DECQLearner):
         Qs: updated Q-value (Theano tensor)
         """
         next_best = tt.max(Qs)
-        Qs = tt.set_subtensor(Qs[action], (1-tau*tt.eq(reward,0)-alpha*tt.neq(reward,0)) * Qs[action] + alpha * (reward + gamma * next_best))
+        Qs = tt.set_subtensor(
+            Qs[action],
+            (1 - tau * tt.eq(reward, 0) - alpha * tt.neq(reward, 0)) * Qs[action]
+            + alpha * (reward + gamma * next_best),
+        )
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, tau, gamma, weight, intercept, actions_set, rewards_set):
@@ -12330,8 +12558,12 @@ class DECQLearner_acceptreject(DECQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -12386,7 +12618,9 @@ class DECQLearner_acceptreject(DECQLearner):
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             tau = pm.Beta("tau", tau_params[0], tau_params[1])  # extinction rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, tau, gamma, weight, intercept, actions_set, rewards_set
@@ -12534,8 +12768,12 @@ class HCQLearner(FlYMazeAgent):
             self.r_history.append([self.r_table[0, 0], self.r_table[0, 1]])
             self.h_history.append([self.h_table[0, 0], self.h_table[0, 1]])
             self.w_history.append(self.w)
-            self.q_history.append([self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
-                                      self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1]])
+            self.q_history.append(
+                [
+                    self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
+                    self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1],
+                ]
+            )
 
     def run_episode(self):
         """
@@ -13343,7 +13581,7 @@ class HCQLearner_esoftmax(HCQLearner):
 
 
 class HCQLearner_acceptreject(HCQLearner):
-    def init_policy_variables(self, theta_r=1, theta_h=1, weight = 1.0, intercept=0.0):
+    def init_policy_variables(self, theta_r=1, theta_h=1, weight=1.0, intercept=0.0):
         """
         Initialize variables for the accept-reject policy.
         ====================================================
@@ -13371,15 +13609,26 @@ class HCQLearner_acceptreject(HCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
 
         q_table = self.w * self.theta_r * self.r_table[state, :] + (1 - self.w) * self.theta_h * self.h_table[state, :]
         accept_probabilities = sigmoid(self.weight * q_table + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action_probabilities = np.array([1-action_1_probability, action_1_probability])
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action_probabilities = np.array([1 - action_1_probability, action_1_probability])
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action, action_probabilities
 
     def vectorizedUpdate(
@@ -13439,11 +13688,13 @@ class HCQLearner_acceptreject(HCQLearner):
             * theta_h
             * tables[self.action_space_size : 2 * self.action_space_size]
         )
-        Ds_ = 1/(1 + tt.exp(-(weight * Ds + intercept)))
-        pDs = tt.stack([ 
-            Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-            Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-        ])
+        Ds_ = 1 / (1 + tt.exp(-(weight * Ds + intercept)))
+        pDs = tt.stack(
+            [
+                Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+                Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+            ]
+        )
 
         g = tt.dot(pDs, tt.abs_((tables[: self.action_space_size] - tt.dot(pDs, tables[: self.action_space_size]))))
         h = tt.sum(
@@ -13505,7 +13756,18 @@ class HCQLearner_acceptreject(HCQLearner):
                 fn=self.vectorizedUpdate,
                 sequences=[actions, rewards],
                 outputs_info=[tables],
-                non_sequences=[alpha_r, gamma, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, weight, intercept],
+                non_sequences=[
+                    alpha_r,
+                    gamma,
+                    alpha_h,
+                    weight_r,
+                    weight_h,
+                    weight_b,
+                    theta_r,
+                    theta_h,
+                    weight,
+                    intercept,
+                ],
             )
 
             Qs = tables[:, : self.action_space_size]
@@ -13518,9 +13780,13 @@ class HCQLearner_acceptreject(HCQLearner):
             Hs_ = Hs_[:-1]
             w_ = tt.concatenate([[0.5 * tt.ones((self.action_space_size), dtype="float64")], w], axis=0)
             w_ = w_[:-1]
-            Ds_ = (w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_)
-            Ds_ = 1/(1 + tt.exp(-(weight * Ds_ + intercept)))
-            log_prob_action1 = tt.log(Ds_[:,1]) + tt.log(3-Ds_[:,0]) - tt.log(3*Ds_[:,1] + 3*Ds_[:,0] - 2*Ds_[:,0]*Ds_[:,1])
+            Ds_ = w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_
+            Ds_ = 1 / (1 + tt.exp(-(weight * Ds_ + intercept)))
+            log_prob_action1 = (
+                tt.log(Ds_[:, 1])
+                + tt.log(3 - Ds_[:, 0])
+                - tt.log(3 * Ds_[:, 1] + 3 * Ds_[:, 0] - 2 * Ds_[:, 0] * Ds_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action1))
@@ -13738,7 +14004,9 @@ class FHCQLearner(FlYMazeAgent):
         reward: reward received (float)
         """
         self.r_table[state, :] = (1 - self.alpha_r) * self.r_table[state, :]
-        self.r_table[state, action] += self.alpha_r * (reward + self.gamma * np.max(self.r_table[new_state]))  # update reward value
+        self.r_table[state, action] += self.alpha_r * (
+            reward + self.gamma * np.max(self.r_table[new_state])
+        )  # update reward value
 
         self.h_table[state, :] = (1 - self.alpha_h) * self.h_table[state, :]  # update habit table
         self.h_table[state, action] += self.alpha_h * 1  # update habit table
@@ -13755,8 +14023,12 @@ class FHCQLearner(FlYMazeAgent):
             self.r_history.append([self.r_table[0, 0], self.r_table[0, 1]])
             self.h_history.append([self.h_table[0, 0], self.h_table[0, 1]])
             self.w_history.append(self.w)
-            self.q_history.append([self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
-                                      self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1]])
+            self.q_history.append(
+                [
+                    self.w * self.theta_r * self.r_table[0, 0] + (1 - self.w) * self.theta_h * self.h_table[0, 0],
+                    self.w * self.theta_r * self.r_table[0, 1] + (1 - self.w) * self.theta_h * self.h_table[0, 1],
+                ]
+            )
 
     def run_episode(self):
         """
@@ -13848,14 +14120,8 @@ class FHCQLearner_egreedy(FHCQLearner):
         tables: updated value tables (Theano tensor)
         """
         next_best = tt.max(tables[: self.action_space_size])
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action],
-            tables[action] + alpha_r * (reward + gamma * next_best),
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * (reward + gamma * next_best),)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -14101,14 +14367,8 @@ class FHCQLearner_softmax(FHCQLearner):
         tables: updated value tables (Theano tensor)
         """
         next_best = tt.max(tables[: self.action_space_size])
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action],
-            tables[action] + alpha_r * (reward + gamma * next_best),
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * (reward + gamma * next_best),)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -14361,14 +14621,8 @@ class FHCQLearner_esoftmax(FHCQLearner):
         """
 
         next_best = tt.max(tables[: self.action_space_size])
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action],
-            tables[action] + alpha_r * (reward + gamma * next_best),
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * (reward + gamma * next_best),)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -14579,7 +14833,7 @@ class FHCQLearner_esoftmax(FHCQLearner):
 
 
 class FHCQLearner_acceptreject(FHCQLearner):
-    def init_policy_variables(self, theta_r=1, theta_h=1, weight = 1.0, intercept=0.0):
+    def init_policy_variables(self, theta_r=1, theta_h=1, weight=1.0, intercept=0.0):
         """
         Initialize variables for the accept-reject policy.
         ====================================================
@@ -14607,15 +14861,26 @@ class FHCQLearner_acceptreject(FHCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
 
         q_table = self.w * self.theta_r * self.r_table[state, :] + (1 - self.w) * self.theta_h * self.h_table[state, :]
         accept_probabilities = sigmoid(self.weight * q_table + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action_probabilities = np.array([1-action_1_probability, action_1_probability])
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action_probabilities = np.array([1 - action_1_probability, action_1_probability])
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action, action_probabilities
 
     def vectorizedUpdate(
@@ -14658,14 +14923,8 @@ class FHCQLearner_acceptreject(FHCQLearner):
         """
 
         next_best = tt.max(tables[: self.action_space_size])
-        tables = tt.set_subtensor(
-            tables[:self.action_space_size],
-            (1 - alpha_r) *  tables[:self.action_space_size],
-        )
-        tables = tt.set_subtensor(
-            tables[action],
-            tables[action] + alpha_r * (reward + gamma * next_best),
-        )
+        tables = tt.set_subtensor(tables[: self.action_space_size], (1 - alpha_r) * tables[: self.action_space_size],)
+        tables = tt.set_subtensor(tables[action], tables[action] + alpha_r * (reward + gamma * next_best),)
         tables = tt.set_subtensor(
             tables[self.action_space_size : 2 * self.action_space_size],
             (1 - alpha_h) * tables[self.action_space_size : 2 * self.action_space_size],
@@ -14680,11 +14939,13 @@ class FHCQLearner_acceptreject(FHCQLearner):
             * theta_h
             * tables[self.action_space_size : 2 * self.action_space_size]
         )
-        Ds_ = 1/(1 + tt.exp(-(weight * Ds + intercept)))
-        pDs = tt.stack([ 
-            Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-            Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
-        ])
+        Ds_ = 1 / (1 + tt.exp(-(weight * Ds + intercept)))
+        pDs = tt.stack(
+            [
+                Ds_[0] * (3 - Ds_[1]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+                Ds_[1] * (3 - Ds_[0]) / (3 * Ds_[0] + 3 * Ds_[1] - 2 * Ds_[0] * Ds_[1]),
+            ]
+        )
 
         g = tt.dot(pDs, tt.abs_((tables[: self.action_space_size] - tt.dot(pDs, tables[: self.action_space_size]))))
         h = tt.sum(
@@ -14746,7 +15007,18 @@ class FHCQLearner_acceptreject(FHCQLearner):
                 fn=self.vectorizedUpdate,
                 sequences=[actions, rewards],
                 outputs_info=[tables],
-                non_sequences=[alpha_r, gamma, alpha_h, weight_r, weight_h, weight_b, theta_r, theta_h, weight, intercept],
+                non_sequences=[
+                    alpha_r,
+                    gamma,
+                    alpha_h,
+                    weight_r,
+                    weight_h,
+                    weight_b,
+                    theta_r,
+                    theta_h,
+                    weight,
+                    intercept,
+                ],
             )
 
             Qs = tables[:, : self.action_space_size]
@@ -14759,9 +15031,13 @@ class FHCQLearner_acceptreject(FHCQLearner):
             Hs_ = Hs_[:-1]
             w_ = tt.concatenate([[0.5 * tt.ones((self.action_space_size), dtype="float64")], w], axis=0)
             w_ = w_[:-1]
-            Ds_ = (w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_)
-            Ds_ = 1/(1 + tt.exp(-(weight * Ds_ + intercept)))
-            log_prob_action1 = tt.log(Ds_[:,1]) + tt.log(3-Ds_[:,0]) - tt.log(3*Ds_[:,1] + 3*Ds_[:,0] - 2*Ds_[:,0]*Ds_[:,1])
+            Ds_ = w_ * theta_r * Qs_ + (1 - w_) * theta_h * Hs_
+            Ds_ = 1 / (1 + tt.exp(-(weight * Ds_ + intercept)))
+            log_prob_action1 = (
+                tt.log(Ds_[:, 1])
+                + tt.log(3 - Ds_[:, 0])
+                - tt.log(3 * Ds_[:, 1] + 3 * Ds_[:, 0] - 2 * Ds_[:, 0] * Ds_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action1))
@@ -15182,7 +15458,7 @@ class OSCQLearner_softmax(OSCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -15349,7 +15625,7 @@ class OSCQLearner_esoftmax(OSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -15524,13 +15800,24 @@ class OSCQLearner_acceptreject(OSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, theta, gamma):
@@ -15586,8 +15873,12 @@ class OSCQLearner_acceptreject(OSCQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -15642,7 +15933,9 @@ class OSCQLearner_acceptreject(OSCQLearner):
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, theta, gamma, weight, intercept, actions_set, rewards_set
@@ -15839,9 +16132,7 @@ class FOSCQLearner_egreedy(FOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = (1 - alpha) * Qs
-        Qs = tt.set_subtensor(
-            Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
-        )
+        Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, theta, gamma, epsilon, actions_set, rewards_set):
@@ -15982,7 +16273,7 @@ class FOSCQLearner_softmax(FOSCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -16006,9 +16297,7 @@ class FOSCQLearner_softmax(FOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = (1 - alpha) * Qs
-        Qs = tt.set_subtensor(
-            Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
-        )
+        Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, theta, gamma, beta, actions_set, rewards_set):
@@ -16151,7 +16440,7 @@ class FOSCQLearner_esoftmax(FOSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -16179,9 +16468,7 @@ class FOSCQLearner_esoftmax(FOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = (1 - alpha) * Qs
-        Qs = tt.set_subtensor(
-            Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
-        )
+        Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, theta, gamma, beta, epsilon, actions_set, rewards_set):
@@ -16328,13 +16615,24 @@ class FOSCQLearner_acceptreject(FOSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, theta, gamma):
@@ -16355,9 +16653,7 @@ class FOSCQLearner_acceptreject(FOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = (1 - alpha) * Qs
-        Qs = tt.set_subtensor(
-            Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
-        )
+        Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, theta, gamma, weight, intercept, actions_set, rewards_set):
@@ -16392,8 +16688,12 @@ class FOSCQLearner_acceptreject(FOSCQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -16448,7 +16748,9 @@ class FOSCQLearner_acceptreject(FOSCQLearner):
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, theta, gamma, weight, intercept, actions_set, rewards_set
@@ -16568,10 +16870,10 @@ class DFOSCQLearner(FlYMazeAgent):
         """
         next_best = np.max(self.q_table[new_state, :])  # best value in the new state
         self.q_table[state, :action] = (1 - self.kappa) * self.q_table[state, :action]
-        self.q_table[state, action] = (1-self.alpha) * self.q_table[state, action] + self.alpha * (
+        self.q_table[state, action] = (1 - self.alpha) * self.q_table[state, action] + self.alpha * (
             reward + self.gamma * next_best + self.theta * (reward == 0)
         )  # update Q-table
-        self.q_table[state, action+1:] = (1 - self.kappa) * self.q_table[state, action+1:]
+        self.q_table[state, action + 1 :] = (1 - self.kappa) * self.q_table[state, action + 1 :]
         if self.history:
             self.q_history.append([self.q_table[0, 0], self.q_table[0, 1]])
 
@@ -16649,8 +16951,10 @@ class DFOSCQLearner_egreedy(DFOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
-        Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
+        )
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, gamma, epsilon, actions_set, rewards_set):
@@ -16795,7 +17099,7 @@ class DFOSCQLearner_softmax(DFOSCQLearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -16820,8 +17124,10 @@ class DFOSCQLearner_softmax(DFOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
-        Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
+        )
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, gamma, beta, actions_set, rewards_set):
@@ -16968,7 +17274,7 @@ class DFOSCQLearner_esoftmax(DFOSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -16996,8 +17302,10 @@ class DFOSCQLearner_esoftmax(DFOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
-        Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
+        )
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, gamma, beta, epsilon, actions_set, rewards_set):
@@ -17148,13 +17456,24 @@ class DFOSCQLearner_acceptreject(DFOSCQLearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, kappa, theta, gamma):
@@ -17176,8 +17495,10 @@ class DFOSCQLearner_acceptreject(DFOSCQLearner):
         """
         next_best = tt.max(Qs)
         Qs = tt.set_subtensor(Qs[:action], (1 - kappa) * Qs[:action])  # update Q-table
-        Qs = tt.set_subtensor(Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best))
-        Qs = tt.set_subtensor(Qs[action+1:], (1 - kappa) * Qs[action+1:])
+        Qs = tt.set_subtensor(
+            Qs[action], (1 - alpha) * Qs[action] + alpha * (reward + theta * tt.eq(reward, 0) + gamma * next_best)
+        )
+        Qs = tt.set_subtensor(Qs[action + 1 :], (1 - kappa) * Qs[action + 1 :])
         return Qs
 
     def vectorizedActionProbabilities(self, alpha, kappa, theta, gamma, weight, intercept, actions_set, rewards_set):
@@ -17214,8 +17535,12 @@ class DFOSCQLearner_acceptreject(DFOSCQLearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -17273,7 +17598,9 @@ class DFOSCQLearner_acceptreject(DFOSCQLearner):
             theta = pm.Normal("theta", theta_params[0], theta_params[1])  # omission sensitivity (normal distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, kappa, theta, gamma, weight, intercept, actions_set, rewards_set
@@ -17599,7 +17926,7 @@ class SARSALearner_softmax(SARSALearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -17762,7 +18089,7 @@ class SARSALearner_esoftmax(SARSALearner):
         Returns:
         action: action to be taken (int)
         """
-        logits = self.q_table[state, :]/self.beta
+        logits = self.q_table[state, :] / self.beta
         logits -= np.max(logits)
         log_prob_actions = logits - np.log(np.sum(np.exp(logits)))
         action_probabilities = np.exp(log_prob_actions)
@@ -17930,13 +18257,24 @@ class SARSALearner_acceptreject(SARSALearner):
         Returns:
         action: action to be taken (int)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
-        action = np.random.choice(self.action_space_size, p=[1-action_1_probability, action_1_probability]) # make choice
+        action = np.random.choice(
+            self.action_space_size, p=[1 - action_1_probability, action_1_probability]
+        )  # make choice
         return action
 
     def vectorizedUpdate(self, action, next_action, reward, Qs, alpha, gamma):
@@ -17991,8 +18329,12 @@ class SARSALearner_acceptreject(SARSALearner):
 
             # Apply the softmax function
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], [tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -18044,7 +18386,9 @@ class SARSALearner_acceptreject(SARSALearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, gamma, weight, intercept, actions_set, rewards_set
@@ -18702,14 +19046,23 @@ class ESARSALearner_acceptreject(ESARSALearner):
         action: action to be taken (int)
         action_probabilities: action probabilities (numpy array)
         """
+
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        
+
         accept_probabilities = sigmoid(self.weight * self.q_table[state, :] + self.intercept)
-        log_prob_action_1 = np.log(accept_probabilities[1]) + np.log(3 - accept_probabilities[0]) - np.log(3 * accept_probabilities[0] + 3 * accept_probabilities[1] - 2 * accept_probabilities[0] * accept_probabilities[1])
+        log_prob_action_1 = (
+            np.log(accept_probabilities[1])
+            + np.log(3 - accept_probabilities[0])
+            - np.log(
+                3 * accept_probabilities[0]
+                + 3 * accept_probabilities[1]
+                - 2 * accept_probabilities[0] * accept_probabilities[1]
+            )
+        )
         action_1_probability = np.exp(log_prob_action_1)
         action_probabilities = np.array([1 - action_1_probability, action_1_probability])
-        action = np.random.choice(self.action_space_size, p=action_probabilities) # make choice
+        action = np.random.choice(self.action_space_size, p=action_probabilities)  # make choice
         return action, action_probabilities
 
     def vectorizedUpdate(self, action, reward, Qs, alpha, gamma, weight, intercept):
@@ -18730,11 +19083,13 @@ class ESARSALearner_acceptreject(ESARSALearner):
         Qs: updated Q-value (Theano tensor)
         """
 
-        Qs_ = 1/(1 + tt.exp(-(weight * Qs + intercept)))
-        pQs = tt.stack([ 
-            Qs_[0] * (3 - Qs_[1]) / (3 * Qs_[0] + 3 * Qs_[1] - 2 * Qs_[0] * Qs_[1]),
-            Qs_[1] * (3 - Qs_[0]) / (3 * Qs_[0] + 3 * Qs_[1] - 2 * Qs_[0] * Qs_[1]),
-        ])
+        Qs_ = 1 / (1 + tt.exp(-(weight * Qs + intercept)))
+        pQs = tt.stack(
+            [
+                Qs_[0] * (3 - Qs_[1]) / (3 * Qs_[0] + 3 * Qs_[1] - 2 * Qs_[0] * Qs_[1]),
+                Qs_[1] * (3 - Qs_[0]) / (3 * Qs_[0] + 3 * Qs_[1] - 2 * Qs_[0] * Qs_[1]),
+            ]
+        )
         Qs = tt.set_subtensor(Qs[action], Qs[action] + alpha * (reward + gamma * tt.dot(pQs, Qs) - Qs[action]))
         return Qs
 
@@ -18770,8 +19125,12 @@ class ESARSALearner_acceptreject(ESARSALearner):
 
             # Compute the action probabilities
             Qs_ = tt.concatenate([[tt.zeros((2), dtype="float64")], Qs], axis=0)
-            Qs_ = 1/(1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
-            log_prob_action_1 = tt.log(Qs_[:,1]) + tt.log(3 - Qs_[:,0]) - tt.log(3 * Qs_[:,0] + 3 * Qs_[:,1] - 2 * Qs_[:,0] * Qs_[:,1])
+            Qs_ = 1 / (1 + tt.exp(-(weight * Qs_[:-1] + intercept)))
+            log_prob_action_1 = (
+                tt.log(Qs_[:, 1])
+                + tt.log(3 - Qs_[:, 0])
+                - tt.log(3 * Qs_[:, 0] + 3 * Qs_[:, 1] - 2 * Qs_[:, 0] * Qs_[:, 1])
+            )
 
             # Store probabilities
             probabilities.append(tt.exp(log_prob_action_1))
@@ -18823,7 +19182,9 @@ class ESARSALearner_acceptreject(ESARSALearner):
             alpha = pm.Beta("alpha", alpha_params[0], alpha_params[1])  # learning rate (beta distribution)
             gamma = pm.Beta("gamma", gamma_params[0], gamma_params[1])  # discount rate (beta distribution)
             weight = pm.Normal("weight", weight_params[0], weight_params[1])  # q-value weight (normal distribution)
-            intercept = pm.Normal("intercept", intercept_params[0], intercept_params[1])  # q-value intercept (normal distribution)
+            intercept = pm.Normal(
+                "intercept", intercept_params[0], intercept_params[1]
+            )  # q-value intercept (normal distribution)
 
             action_probabilities = self.vectorizedActionProbabilities(
                 alpha, gamma, weight, intercept, actions_set, rewards_set
@@ -19115,11 +19476,7 @@ class DQLearner_egreedy(DQLearner):
                 "like", p=action_probabilities, observed=np.concatenate([a for a in actions_set])
             )  # Bernoulli likelihood
             trace = pm.sample(
-                tune=ntune,
-                draws=niters,
-                chains=nchains,
-                cores=nparallel,
-                return_inferencedata=True,
+                tune=ntune, draws=niters, chains=nchains, cores=nparallel, return_inferencedata=True,
             )  # sample posterior
 
         if plot_trace:  # plot trace
@@ -19279,11 +19636,7 @@ class DQLearner_softmax(DQLearner):
                 "like", p=action_probabilities, observed=np.concatenate([a for a in actions_set])
             )  # Bernoulli likelihood
             trace = pm.sample(
-                tune=ntune,
-                draws=niters,
-                chains=nchains,
-                cores=nparallel,
-                return_inferencedata=True,
+                tune=ntune, draws=niters, chains=nchains, cores=nparallel, return_inferencedata=True,
             )  # sample posterior
 
         if plot_trace:  # plot trace
@@ -19450,11 +19803,7 @@ class DQLearner_esoftmax(DQLearner):
                 "like", p=action_probabilities, observed=np.concatenate([a for a in actions_set])
             )  # Bernoulli likelihood
             trace = pm.sample(
-                tune=ntune,
-                draws=niters,
-                chains=nchains,
-                cores=nparallel,
-                return_inferencedata=True,
+                tune=ntune, draws=niters, chains=nchains, cores=nparallel, return_inferencedata=True,
             )  # sample posterior
 
         if plot_trace:  # plot trace

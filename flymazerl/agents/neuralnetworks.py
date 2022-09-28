@@ -598,8 +598,65 @@ class GRNNLearner(FlYMazeAgent):
 
         hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
         logits = self.agent.forward(X.float(), hidden)
-        action_probabilities = logits.softmax(dim=2)[:, :, 1].cpu().detach().numpy()
+        if self.policy_type == "softmax":
+            action_probabilities = logits.softmax(dim=2).squeeze(0)[-1].cpu().detach().numpy()
+        elif self.policy_type == "greedy":
+            action_probabilities = logits.squeeze(0)[-1].cpu().detach().numpy()
+        elif self.policy_type == "acceptreject":
+            action_probabilities = (
+                torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(logits[:, :, 0])
+                            + torch.log(3 - logits[:, :, 1])
+                            - torch.log(
+                                3 * logits[:, :, 1] + 3 * logits[:, :, 0] - 2 * logits[:, :, 0] * logits[:, :, 1]
+                            ),
+                            torch.log(logits[:, :, 1])
+                            + torch.log(3 - logits[:, :, 0])
+                            - torch.log(
+                                3 * logits[:, :, 1] + 3 * logits[:, :, 0] - 2 * logits[:, :, 0] * logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                )
+                .squeeze(0)[-1]
+                .cpu()
+                .detach()
+                .numpy()
+            )
+        else:
+            raise ValueError("Unknown policy type: {}".format(self.policy_type))
         return action_probabilities
+
+    def get_q_values_from_data(self, actions_set, rewards_set):
+        """
+        Given a dataset, infer the action probabilities
+        ===============================================
+
+        actions_set: The set of actions taken in the dataset (np.array)
+        rewards_set: The set of rewards obtained in the dataset (np.array)
+
+        Returns:
+        action_probabilities: The inferred action probabilities (np.array)
+        """
+
+        dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
+            self.device
+        )
+        X = torch.clone(dataset[:, :-1, :])
+        if self.omission_is_punishment:
+            X = X * 2 - 1
+        else:
+            X[:, :, 0] = X[:, :, 0] * 2 - 1
+
+        hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
+        logits = self.agent.forward(X.float(), hidden)
+        if self.multi_agent:
+            return logits[:, :, :].cpu().detach().numpy()
+        else:
+            return logits[:, :, :].squeeze(0).cpu().detach().numpy()
 
     def load_pre_trained_model(self, model_path):
         """
@@ -1193,8 +1250,62 @@ class GQLearner(FlYMazeAgent):
             X[:, :, 0] = X[:, :, 0] * 2 - 1
 
         logits = self.agent.forward_loop(X.float())
-        action_probabilities = logits.softmax(dim=2)[:, :, 1].cpu().detach().numpy()
+        if self.policy_type == "softmax":
+            action_probabilities = logits.softmax(dim=2).squeeze(0)[-1].cpu().detach().numpy()
+        elif self.policy_type == "greedy":
+            action_probabilities = logits.squeeze(0)[-1].cpu().detach().numpy()
+        elif self.policy_type == "acceptreject":
+            action_probabilities = (
+                torch.exp(
+                    torch.stack(
+                        [
+                            torch.log(logits[:, :, 0])
+                            + torch.log(3 - logits[:, :, 1])
+                            - torch.log(
+                                3 * logits[:, :, 1] + 3 * logits[:, :, 0] - 2 * logits[:, :, 0] * logits[:, :, 1]
+                            ),
+                            torch.log(logits[:, :, 1])
+                            + torch.log(3 - logits[:, :, 0])
+                            - torch.log(
+                                3 * logits[:, :, 1] + 3 * logits[:, :, 0] - 2 * logits[:, :, 0] * logits[:, :, 1]
+                            ),
+                        ],
+                        dim=2,
+                    )
+                )
+                .squeeze(0)[-1]
+                .cpu()
+                .detach()
+                .numpy()
+            )
         return action_probabilities
+
+    def get_q_values_from_data(self, actions_set, rewards_set):
+        """
+        Given a dataset, infer the action probabilities
+        ===============================================
+
+        actions_set: The set of actions taken in the dataset (np.array)
+        rewards_set: The set of rewards obtained in the dataset (np.array)
+
+        Returns:
+        action_probabilities: The inferred action probabilities (np.array)
+        """
+
+        dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
+            self.device
+        )
+        X = torch.clone(dataset[:, :-1, :])
+        if self.omission_is_punishment:
+            X = X * 2 - 1
+        else:
+            X[:, :, 0] = X[:, :, 0] * 2 - 1
+
+        logits = self.agent.forward_loop(X.float())
+        if self.multi_agent:
+            return logits[:, :, :].cpu().detach().numpy()
+        else:
+            return logits[:, :, :].squeeze(0).cpu().detach().numpy()
 
     def fit(
         self,
