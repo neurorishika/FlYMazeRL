@@ -7,7 +7,7 @@ import string
 import requests
 import io
 
-from flymazerl.agents.neuralnetworks import GQLearner, GRNNLearner
+from flymazerl.agents.nn import *
 from flymazerl.gym.environment import *
 
 import numpy as np
@@ -28,6 +28,17 @@ Developed by:
 
 print(start_text)
 
+# get FlYMAZERL PATH from environment variable
+try:
+    FLYMAZERL_PATH = os.environ["FLYMAZERL_PATH"]
+    # replace backslashes with forward slashes
+    FLYMAZERL_PATH = FLYMAZERL_PATH.replace("\\", "/")
+    # add a trailing slash if not present
+    if FLYMAZERL_PATH[-1] != "/":
+        FLYMAZERL_PATH += "/"
+except KeyError:
+    raise Exception("FLYMAZERL_PATH environment variable not set.")
+
 model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
 
 argument_parser = argparse.ArgumentParser(
@@ -38,26 +49,30 @@ argument_parser.add_argument("--save_path", type=str, default="../fits/nn/", hel
 argument_parser.add_argument(
     "--agent", type=str, default="GQNN", help="Agent to use. Options: GQNN, GRNN",
 )
+# training data
 argument_parser.add_argument(
     "--action-set-data",
     type=str,
-    default="https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/action_set.csv",
+    default=FLYMAZERL_PATH + "/data/mohanta2022/training_choice_set.csv",
     help="The file to load the action set data from.",
 )
 argument_parser.add_argument(
     "--reward-set-data",
     type=str,
-    default="https://raw.githubusercontent.com/neurorishika/flymazerl/main/data/reward_set.csv",
+    default=FLYMAZERL_PATH + "/data/mohanta2022/training_reward_set.csv",
     help="The file to load the reward set data from.",
 )
 # Training parameters
 argument_parser.add_argument("--n_folds", type=int, default=3, help="Number of K-fold cross-validation folds to use.")
 argument_parser.add_argument("--n_ensemble", type=int, default=100, help="Number of ensemble models to use.")
 argument_parser.add_argument("--history_size", type=int, default=10, help="History size to use.")
-argument_parser.add_argument("--max_epochs", type=int, default=10000, help="Maximum number of epochs to use.")
+argument_parser.add_argument("--max_epochs", type=int, default=100000, help="Maximum number of epochs to use.")
 argument_parser.add_argument(
-    "--early_stopping", type=int, default=100, help="Number of epochs to wait before stopping."
+    "--early_stopping", type=int, default=5000, help="Number of epochs to wait before stopping."
 )
+argument_parser.add_argument("--minibatch_size", type=int, default=1, help="Minibatch size to use.")
+argument_parser.add_argument("--minibatch_seed", type=int, default=15403997, help="Seed for minibatch selection.")
+argument_parser.add_argument("--use_lr_scheduler", type=bool, default=False, help="Use learning rate scheduler.")
 argument_parser.add_argument("--learning_rate", type=float, default=5e-3, help="Learning rate to use.")
 argument_parser.add_argument("--weight_decay", type=float, default=1e-5, help="Weight decay to use.")
 argument_parser.add_argument("--print_every", type=int, default=500, help="Number of epochs to wait before printing.")
@@ -102,6 +117,7 @@ argument_parser.add_argument("--allow_negative", type=str, default="no", help="W
 argument_parser.add_argument(
     "--omission_is_punishment", type=str, default="no", help="Whether to use omission as a punishment."
 )
+argument_parser.add_argument("--hardness", type=float, default=0.8141, help="Balance between Sigmoid and Hardsigmoid.")
 
 args = argument_parser.parse_args()
 
@@ -161,7 +177,7 @@ if not os.path.exists(save_path):
 with open(save_path + "params.json", "w") as f:
     json.dump(vars(args), f, indent=4)
 
-# load the data
+# load the training data
 if args.action_set_data.startswith("http"):
     # use requests to download the data
     response = requests.get(args.action_set_data)
@@ -184,6 +200,7 @@ results_df = pd.DataFrame(
         "EnsembleID",
         "FoldID",
         "FlyID",
+        "nParams",
         "MSE(train)",
         "NMSE(train)",
         "LogLikelihood(train)",
@@ -220,6 +237,9 @@ fit_params = {
     "weight_decay": args.weight_decay,
     "filter_best": False,
     "tolerance": args.tolerance,
+    "scheduler": args.use_lr_scheduler,
+    "minibatch_size": args.minibatch_size,
+    "minibatch_seed": args.minibatch_seed,
 }
 
 # create learner parameters
@@ -233,6 +253,7 @@ learner_params = {
     "model_path": None,
     "multi_agent": False,
     "n_agents": 1,
+    "hardness": args.hardness,
 }
 if args.agent == "GQNN":
     learner_params["hidden_state_sizes"] = args.hidden_state_sizes
@@ -299,7 +320,7 @@ for ensemble_id in range(args.n_ensemble):
             obs_action_smooth = np.convolve(
                 obs_actions, np.ones((args.history_size,)) / args.history_size, mode="full"
             )[args.history_size :]
-            pred_action_prob = p_action_train[i, :]
+            pred_action_prob = p_action_train[i, :, -1]
             pred_action_smooth = np.convolve(
                 pred_action_prob, np.ones((args.history_size,)) / args.history_size, mode="full"
             )[args.history_size :]
@@ -329,6 +350,7 @@ for ensemble_id in range(args.n_ensemble):
                 ensemble_id,
                 fold_id,
                 fly_id,
+                n_params,
                 mse_train,
                 nmse_train,
                 ll_train,
@@ -349,62 +371,64 @@ for ensemble_id in range(args.n_ensemble):
                 fit_statistics[0]["training_time"],
             ]
 
-        # evaluate the model on validation data
-        p_action_val = agent.get_action_probabilities_from_data(val_set["actions"], val_set["rewards"])
-        for i, fly_id in enumerate(val_set["indices"]):
-            obs_actions = val_set["actions"][i][1:] if args.agent == "GRNN" else val_set["actions"][i]
-            obs_action_smooth = np.convolve(
-                obs_actions, np.ones((args.history_size,)) / args.history_size, mode="full"
-            )[args.history_size :]
-            pred_action_prob = p_action_val[i, :]
-            pred_action_smooth = np.convolve(
-                pred_action_prob, np.ones((args.history_size,)) / args.history_size, mode="full"
-            )[args.history_size :]
+        if args.n_folds > 1:
+            # evaluate the model on validation data
+            p_action_val = agent.get_action_probabilities_from_data(val_set["actions"], val_set["rewards"])
+            for i, fly_id in enumerate(val_set["indices"]):
+                obs_actions = val_set["actions"][i][1:] if args.agent == "GRNN" else val_set["actions"][i]
+                obs_action_smooth = np.convolve(
+                    obs_actions, np.ones((args.history_size,)) / args.history_size, mode="full"
+                )[args.history_size :]
+                pred_action_prob = p_action_val[i, :, -1]
+                pred_action_smooth = np.convolve(
+                    pred_action_prob, np.ones((args.history_size,)) / args.history_size, mode="full"
+                )[args.history_size :]
 
-            # calculate MSE
-            mse_val = np.mean((obs_action_smooth - pred_action_smooth) ** 2)
+                # calculate MSE
+                mse_val = np.mean((obs_action_smooth - pred_action_smooth) ** 2)
 
-            # calculate NMSE by dividing by the variance of the observed action probabilities
-            nmse_val = mse_val / np.std(obs_action_smooth ** 2)
+                # calculate NMSE by dividing by the variance of the observed action probabilities
+                nmse_val = mse_val / np.std(obs_action_smooth ** 2)
 
-            n_params = sum(p.numel() for p in agent.agent.parameters() if p.requires_grad)
+                n_params = sum(p.numel() for p in agent.agent.parameters() if p.requires_grad)
 
-            # calculate bernoulli log likelihood of the actions given the predicted action probabilities
-            ll_val = np.sum(np.log(pred_action_prob[obs_actions == 1])) + np.sum(
-                np.log(1 - pred_action_prob[obs_actions == 0])
-            )
+                # calculate bernoulli log likelihood of the actions given the predicted action probabilities
+                ll_val = np.sum(np.log(pred_action_prob[obs_actions == 1])) + np.sum(
+                    np.log(1 - pred_action_prob[obs_actions == 0])
+                )
 
-            # calculate AIC
-            aic_val = -2 / len(obs_actions) * mse_val + 2 * n_params
+                # calculate AIC
+                aic_val = -2 / len(obs_actions) * mse_val + 2 * n_params
 
-            # calculate BIC
-            bic_val = -2 / len(obs_actions) * mse_val + n_params * np.log(len(obs_actions))
+                # calculate BIC
+                bic_val = -2 / len(obs_actions) * mse_val + n_params * np.log(len(obs_actions))
 
-            # append to dataframe
-            results_df.loc[len(results_df)] = [
-                parameter_string,
-                ensemble_id,
-                fold_id,
-                fly_id,
-                np.NaN,
-                np.NaN,
-                np.NaN,
-                np.NaN,
-                np.NaN,
-                mse_val,
-                nmse_val,
-                ll_val,
-                aic_val,
-                bic_val,
-                pred_action_prob.tolist(),
-                "ensemble_{}_fold_{}".format(ensemble_id, fold_id),
-                fit_statistics[0]["training_loss"],
-                fit_statistics[0]["validation_loss"],
-                fit_statistics[0]["best_val_loss"],
-                fit_statistics[0]["epoch"],
-                fit_statistics[0]["best_val_epoch"],
-                fit_statistics[0]["training_time"],
-            ]
+                # append to dataframe
+                results_df.loc[len(results_df)] = [
+                    parameter_string,
+                    ensemble_id,
+                    fold_id,
+                    fly_id,
+                    n_params,
+                    np.NaN,
+                    np.NaN,
+                    np.NaN,
+                    np.NaN,
+                    np.NaN,
+                    mse_val,
+                    nmse_val,
+                    ll_val,
+                    aic_val,
+                    bic_val,
+                    pred_action_prob.tolist(),
+                    "ensemble_{}_fold_{}".format(ensemble_id, fold_id),
+                    fit_statistics[0]["training_loss"],
+                    fit_statistics[0]["validation_loss"],
+                    fit_statistics[0]["best_val_loss"],
+                    fit_statistics[0]["epoch"],
+                    fit_statistics[0]["best_val_epoch"],
+                    fit_statistics[0]["training_time"],
+                ]
 
 # save the results to a file with compression
 results_df.to_csv(save_path + "results.csv.gz", index=False, compression="gzip")
