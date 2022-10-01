@@ -39,8 +39,6 @@ try:
 except KeyError:
     raise Exception("FLYMAZERL_PATH environment variable not set.")
 
-model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
-
 argument_parser = argparse.ArgumentParser(
     description=start_text
     + "Script to fit the parameters of the a variety of NN-based RL agents to the a 2AFC maze task using Backpropagation (through time)."

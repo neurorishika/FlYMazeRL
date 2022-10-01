@@ -39,7 +39,9 @@ try:
 except KeyError:
     raise Exception("FLYMAZERL_PATH environment variable not set.")
 
-model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
+model_database = pd.read_csv(
+    "https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv"
+)
 
 argument_parser = argparse.ArgumentParser(
     description=start_text
@@ -55,13 +57,13 @@ argument_parser.add_argument(
 argument_parser.add_argument(
     "--action-set-data",
     type=str,
-    default=FLYMAZERL_PATH + "/data/mohanta2022/training_choice_set.csv",
+    default=FLYMAZERL_PATH + "/data/rajagopalan2022/training_choice_set.csv",
     help="The file to load the action set data from.",
 )
 argument_parser.add_argument(
     "--reward-set-data",
     type=str,
-    default=FLYMAZERL_PATH + "/data/mohanta2022/training_reward_set.csv",
+    default=FLYMAZERL_PATH + "/data/rajagopalan2022/training_reward_set.csv",
     help="The file to load the reward set data from.",
 )
 argument_parser.add_argument("--n_chains", type=int, default=1, help="Number of MC-MC chains to sample")
