@@ -1,6 +1,4 @@
 from flymazerl.agents.classical import *
-from flymazerl.agents.phenomenological import *
-from flymazerl.agents.neuralnetworks import *
 from flymazerl.optimize.static import *
 from flymazerl.utils.generators import generate_random_schedule_with_blocks
 
