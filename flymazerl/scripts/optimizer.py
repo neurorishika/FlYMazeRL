@@ -32,7 +32,20 @@ Developed by:
 
 print(start_text)
 
-model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
+# get FlYMAZERL PATH from environment variable
+try:
+    FLYMAZERL_PATH = os.environ["FLYMAZERL_PATH"]
+    # replace backslashes with forward slashes
+    FLYMAZERL_PATH = FLYMAZERL_PATH.replace("\\", "/")
+    # add a trailing slash if not present
+    if FLYMAZERL_PATH[-1] != "/":
+        FLYMAZERL_PATH += "/"
+except KeyError:
+    raise Exception("FLYMAZERL_PATH environment variable not set.")
+
+model_database = pd.read_csv(
+    "https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv"
+)
 
 argument_parser = argparse.ArgumentParser(
     description=start_text + "Script to optimize pre-trained RL agents to maximize bias in a 2AFC maze task."
@@ -40,9 +53,7 @@ argument_parser = argparse.ArgumentParser(
 argument_parser.add_argument(
     "--exit_on_completion", type=bool, default=True, help="Whether to end the job after completion."
 )
-argument_parser.add_argument(
-    "--save_path", type=str, default="../optimized_schedules/", help="Path to save schedules."
-)
+argument_parser.add_argument("--save_path", type=str, default="../optimized_schedules/", help="Path to save schedules.")
 argument_parser.add_argument(
     "--save_intermediate", type=bool, default=True, help="Whether to save intermediate schedules."
 )
@@ -83,7 +94,10 @@ argument_parser.add_argument(
     "--independent_shuffles", type=bool, default=True, help="Whether to shuffle the schedule independently"
 )
 argument_parser.add_argument(
-    "--reference_agent", type=str, default="CQES", help="Reference agent for fitness evaluation (Ref: SHORTCODE column in model_description.csv)"
+    "--reference_agent",
+    type=str,
+    default="CQES",
+    help="Reference agent for fitness evaluation (Ref: SHORTCODE column in model_description.csv)",
 )
 args = argument_parser.parse_args()
 
@@ -99,15 +113,7 @@ unique_id = np.random.randint(100000, 999999)
 
 print("Optimizing agent: {}".format(agentClass.__name__))
 
-log_file = (
-    args.save_path
-    + args.agent
-    + "_"
-    + timestring
-    + "_"
-    + str(unique_id)
-    + ".log"
-)
+log_file = args.save_path + args.agent + "_" + timestring + "_" + str(unique_id) + ".log"
 print("Saving to: {}".format(log_file))
 
 with open(log_file, "w", encoding="utf-8") as f:
