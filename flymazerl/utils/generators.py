@@ -1,16 +1,14 @@
-global model_database
-
 import numpy as np
 import pandas as pd
 import arviz as az
 import os
 import platform
 
-model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description.csv")
+
 if platform.system() == "Windows":
-    model_fits_directory = "C:/Rishika/Projects/"
+    model_fits_directory = "Z:/FlYMazeRL_Fits/"
 elif platform.system() == "Linux":
-    model_fits_directory = "/groups/turner/home/mohantas/project/"
+    model_fits_directory = "/groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/"
 
 
 def generate_random_schedule(n_trials_per_session, reward_fraction, exclusive=False):
@@ -113,7 +111,7 @@ def generate_random_schedule_with_blocks(
     return schedule
 
 
-def generate_params_from_fits(agentClass, n_samples, sample_from_population=True):
+def generate_params_from_fits(agentClass, n_samples, sample_from_population=True, dataset="rajagopalan"):
     """
     Generates params and policy_params from fitted agent
     ====================================================
@@ -121,10 +119,21 @@ def generate_params_from_fits(agentClass, n_samples, sample_from_population=True
     Parameters:
     -----------
     agentClass: the agent class (class)
+    n_samples: number of samples to generate (int)
+    sample_from_population: whether to sample from the population (bool)
+    dataset: the dataset to sample from (str: "rajagopalan" or "mohanta")
     """
+    if dataset == "rajagopalan":
+        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+    elif dataset == "mohanta":
+        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+    else:
+        raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
+        
     fit_dir = (
         model_fits_directory + model_database.loc[model_database.AgentClass == agentClass.__name__, "FitDir"].values[0]
     )
+    print(fit_dir)
     assert fit_dir is not None, "Fit Directory not found in model_database"
     assert os.path.exists(fit_dir), "Fit Directory not found"
     assert fit_dir.endswith(".nc"), "Fit Directory must be a netcdf file for this function"
