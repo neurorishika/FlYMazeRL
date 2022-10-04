@@ -1,8 +1,21 @@
+global FLYMAZERL_PATH
+
 import numpy as np
 from multiprocessing import Pool
 import os
 import time
 import pandas as pd
+
+# get FlYMAZERL PATH from environment variable
+try:
+    FLYMAZERL_PATH = os.environ["FLYMAZERL_PATH"]
+    # replace backslashes with forward slashes
+    FLYMAZERL_PATH = FLYMAZERL_PATH.replace("\\", "/")
+    # add a trailing slash if not present
+    if FLYMAZERL_PATH[-1] != "/":
+        FLYMAZERL_PATH += "/"
+except KeyError:
+    raise Exception("FLYMAZERL_PATH environment variable not set.")
 
 
 def get_agent_history(env, agentClass, params=None, policy_params=None, include_reward=False, dataset="rajagopalan"):
@@ -22,9 +35,9 @@ def get_agent_history(env, agentClass, params=None, policy_params=None, include_
     action_history: action history (np.array)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
     
@@ -139,9 +152,9 @@ def get_agent_bias(env, agentClass, params=None, policy_params=None, dataset="ra
     bias: bias estimate (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
     
@@ -175,9 +188,9 @@ def get_agent_performance(env, agentClass, params=None, policy_params=None, data
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
         
@@ -211,9 +224,9 @@ def get_agent_failure(env, agentClass, params=None, policy_params=None, dataset=
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 
@@ -247,9 +260,9 @@ def get_agent_separation(env, agentClass1, agentClass2, params1=None, params2=No
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 
@@ -452,9 +465,9 @@ def get_agent_value_history(env, agentClass, params=None, policy_params=None, da
     value_history: value history (np.array)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 

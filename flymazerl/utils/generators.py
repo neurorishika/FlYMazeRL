@@ -1,9 +1,21 @@
+global FLYMAZERL_PATH
+
 import numpy as np
 import pandas as pd
 import arviz as az
 import os
 import platform
 
+# get FlYMAZERL PATH from environment variable
+try:
+    FLYMAZERL_PATH = os.environ["FLYMAZERL_PATH"]
+    # replace backslashes with forward slashes
+    FLYMAZERL_PATH = FLYMAZERL_PATH.replace("\\", "/")
+    # add a trailing slash if not present
+    if FLYMAZERL_PATH[-1] != "/":
+        FLYMAZERL_PATH += "/"
+except KeyError:
+    raise Exception("FLYMAZERL_PATH environment variable not set.")
 
 if platform.system() == "Windows":
     model_fits_directory = "Z:/FlYMazeRL_Fits/"
@@ -124,12 +136,12 @@ def generate_params_from_fits(agentClass, n_samples, sample_from_population=True
     dataset: the dataset to sample from (str: "rajagopalan" or "mohanta")
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv("https://raw.githubusercontent.com/neurorishika/flymazerl/main/model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
-        
+
     fit_dir = (
         model_fits_directory + model_database.loc[model_database.AgentClass == agentClass.__name__, "FitDir"].values[0]
     )
