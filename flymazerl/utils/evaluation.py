@@ -35,12 +35,12 @@ def get_agent_history(env, agentClass, params=None, policy_params=None, include_
     action_history: action history (np.array)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
-    
+
     np.random.seed((os.getpid() * int(time.time())) % 123456789)
     if params is None and policy_params is None:
         agent = agentClass(env, history=True)
@@ -60,7 +60,16 @@ def get_agent_history(env, agentClass, params=None, policy_params=None, include_
         return agent.action_history
 
 
-def get_schedule_histories(env, agentClass, n_agents, params=None, policy_params=None, parallelize=False, include_reward=False,dataset="rajagopalan"):
+def get_schedule_histories(
+    env,
+    agentClass,
+    n_agents,
+    params=None,
+    policy_params=None,
+    parallelize=False,
+    include_reward=False,
+    dataset="rajagopalan",
+):
     """
     Simulate n_agents agents in parallelize and return their action histories.
     =======================================================================
@@ -85,7 +94,8 @@ def get_schedule_histories(env, agentClass, n_agents, params=None, policy_params
             if parallelize:
                 with Pool(n_agents) as p:
                     histories = p.starmap(
-                        get_agent_history, [(env, agentClass, params[i], policy_params[i], True, dataset) for i in range(n_agents)]
+                        get_agent_history,
+                        [(env, agentClass, params[i], policy_params[i], True, dataset) for i in range(n_agents)],
                     )
                     action_histories = [histories[i][0] for i in range(n_agents)]
                     reward_histories = [histories[i][1] for i in range(n_agents)]
@@ -99,7 +109,9 @@ def get_schedule_histories(env, agentClass, n_agents, params=None, policy_params
         else:
             if parallelize:
                 with Pool(n_agents) as p:
-                    histories = p.starmap(get_agent_history, [(env, agentClass, params, policy_params, True, dataset)] * n_agents)
+                    histories = p.starmap(
+                        get_agent_history, [(env, agentClass, params, policy_params, True, dataset)] * n_agents
+                    )
                     action_histories = [histories[i][0] for i in range(n_agents)]
                     reward_histories = [histories[i][1] for i in range(n_agents)]
             else:
@@ -117,21 +129,24 @@ def get_schedule_histories(env, agentClass, n_agents, params=None, policy_params
             if parallelize:
                 with Pool(n_agents) as p:
                     action_histories = p.starmap(
-                        get_agent_history, [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)]
+                        get_agent_history,
+                        [(env, agentClass, params[i], policy_params[i], False, dataset) for i in range(n_agents)],
                     )
             else:
                 action_histories = []
                 for i in range(n_agents):
-                    action_history = get_agent_history(env, agentClass, params[i], policy_params[i], dataset)
+                    action_history = get_agent_history(env, agentClass, params[i], policy_params[i], False, dataset)
                     action_histories.append(action_history)
         else:
             if parallelize:
                 with Pool(n_agents) as p:
-                    action_histories = p.starmap(get_agent_history, [(env, agentClass, params, policy_params, dataset)] * n_agents)
+                    action_histories = p.starmap(
+                        get_agent_history, [(env, agentClass, params, policy_params, False, dataset)] * n_agents
+                    )
             else:
                 action_histories = []
                 for i in range(n_agents):
-                    action_history = get_agent_history(env, agentClass, params, policy_params, dataset)
+                    action_history = get_agent_history(env, agentClass, params, policy_params, False, dataset)
                     action_histories.append(action_history)
         return action_histories
 
@@ -152,12 +167,12 @@ def get_agent_bias(env, agentClass, params=None, policy_params=None, dataset="ra
     bias: bias estimate (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
-    
+
     np.random.seed((os.getpid() * int(time.time())) % 123456789)
     if params is None and policy_params is None:
         agent = agentClass(env, history=True)
@@ -171,6 +186,7 @@ def get_agent_bias(env, agentClass, params=None, policy_params=None, dataset="ra
         agent = agentClass(env, params=params, policy_params=policy_params, history=True)
     agent.next_episode()
     return agent.get_bias_estimate()
+
 
 def get_agent_performance(env, agentClass, params=None, policy_params=None, dataset="rajagopalan"):
     """
@@ -188,12 +204,12 @@ def get_agent_performance(env, agentClass, params=None, policy_params=None, data
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
-        
+
     np.random.seed((os.getpid() * int(time.time())) % 123456789)
     if params is None and policy_params is None:
         agent = agentClass(env, history=True)
@@ -207,6 +223,7 @@ def get_agent_performance(env, agentClass, params=None, policy_params=None, data
         agent = agentClass(env, params=params, policy_params=policy_params, history=True)
     agent.next_episode()
     return np.mean(agent.reward_history)
+
 
 def get_agent_failure(env, agentClass, params=None, policy_params=None, dataset="rajagopalan"):
     """
@@ -224,9 +241,9 @@ def get_agent_failure(env, agentClass, params=None, policy_params=None, dataset=
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 
@@ -242,9 +259,19 @@ def get_agent_failure(env, agentClass, params=None, policy_params=None, dataset=
     else:
         agent = agentClass(env, params=params, policy_params=policy_params, history=True)
     agent.next_episode()
-    return 1-np.mean(agent.reward_history)
+    return 1 - np.mean(agent.reward_history)
 
-def get_agent_separation(env, agentClass1, agentClass2, params1=None, params2=None, policy_params1=None, policy_params2=None, dataset="rajagopalan"):
+
+def get_agent_separation(
+    env,
+    agentClass1,
+    agentClass2,
+    params1=None,
+    params2=None,
+    policy_params1=None,
+    policy_params2=None,
+    dataset="rajagopalan",
+):
     """
     Simulate two agents and return their difference in actions chosen
     =================================================================
@@ -260,9 +287,9 @@ def get_agent_separation(env, agentClass1, agentClass2, params1=None, params2=No
     performance: fraction of trials rewarded (float)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 
@@ -289,10 +316,23 @@ def get_agent_separation(env, agentClass1, agentClass2, params1=None, params2=No
         agent2 = agentClass2(env, params=params2, policy_params=policy_params2, history=True)
     agent1.next_episode()
     agent2.next_episode()
-    difference = np.mean(np.power(np.array(agent1.action_history) - np.array(agent2.action_history),2))
+    difference = np.mean(np.power(np.array(agent1.action_history) - np.array(agent2.action_history), 2))
     return difference
 
-def get_schedule_fitness(env, agentClass, n_agents, params=None, policy_params=None, parallelize=False, fitness_type="bias", ref_agentClass=None, ref_params=None, ref_policy_params=None, dataset="rajagopalan"):
+
+def get_schedule_fitness(
+    env,
+    agentClass,
+    n_agents,
+    params=None,
+    policy_params=None,
+    parallelize=False,
+    fitness_type="bias",
+    ref_agentClass=None,
+    ref_params=None,
+    ref_policy_params=None,
+    dataset="rajagopalan",
+):
     """
     Simulate n_agents agents in parallelize and return their action histories.
     =======================================================================
@@ -320,32 +360,61 @@ def get_schedule_fitness(env, agentClass, n_agents, params=None, policy_params=N
             if fitness_type == "bias":
                 with Pool(n_agents) as p:
                     bias_pool = p.starmap(
-                        get_agent_bias, [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)]
+                        get_agent_bias,
+                        [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)],
                     )
                 fitness = np.mean(bias_pool)
             elif fitness_type == "performance":
                 with Pool(n_agents) as p:
                     performance_pool = p.starmap(
-                        get_agent_performance, [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)]
+                        get_agent_performance,
+                        [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)],
                     )
                 fitness = np.mean(performance_pool)
             elif fitness_type == "failure":
                 with Pool(n_agents) as p:
                     failure_pool = p.starmap(
-                        get_agent_failure, [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)]
+                        get_agent_failure,
+                        [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)],
                     )
                 fitness = np.mean(failure_pool)
             elif fitness_type == "separation":
                 assert ref_agentClass is not None, "ref_agentClass must be specified for separation"
-                if isinstance(ref_params,list) and isinstance(ref_policy_params,list):
+                if isinstance(ref_params, list) and isinstance(ref_policy_params, list):
                     with Pool(n_agents) as p:
                         separation_pool = p.starmap(
-                            get_agent_separation, [(env, agentClass, ref_agentClass, params[i], ref_params[i], policy_params[i], ref_policy_params[i], dataset) for i in range(n_agents)]
+                            get_agent_separation,
+                            [
+                                (
+                                    env,
+                                    agentClass,
+                                    ref_agentClass,
+                                    params[i],
+                                    ref_params[i],
+                                    policy_params[i],
+                                    ref_policy_params[i],
+                                    dataset,
+                                )
+                                for i in range(n_agents)
+                            ],
                         )
                 else:
                     with Pool(n_agents) as p:
                         separation_pool = p.starmap(
-                            get_agent_separation, [(env, agentClass, ref_agentClass, params[i], ref_params, policy_params[i], ref_policy_params, dataset) for i in range(n_agents)]
+                            get_agent_separation,
+                            [
+                                (
+                                    env,
+                                    agentClass,
+                                    ref_agentClass,
+                                    params[i],
+                                    ref_params,
+                                    policy_params[i],
+                                    ref_policy_params,
+                                    dataset,
+                                )
+                                for i in range(n_agents)
+                            ],
                         )
                 fitness = np.mean(separation_pool)
             else:
@@ -371,15 +440,33 @@ def get_schedule_fitness(env, agentClass, n_agents, params=None, policy_params=N
                 fitness = np.mean(failure_pool)
             elif fitness_type == "separation":
                 assert ref_agentClass is not None, "ref_agentClass must be specified for separation"
-                if isinstance(ref_params,list) and isinstance(ref_policy_params,list):
+                if isinstance(ref_params, list) and isinstance(ref_policy_params, list):
                     separation_pool = []
                     for i in range(n_agents):
-                        separation = get_agent_separation(env, agentClass, ref_agentClass, params[i], ref_params[i], policy_params[i], ref_policy_params[i], dataset)
+                        separation = get_agent_separation(
+                            env,
+                            agentClass,
+                            ref_agentClass,
+                            params[i],
+                            ref_params[i],
+                            policy_params[i],
+                            ref_policy_params[i],
+                            dataset,
+                        )
                         separation_pool.append(separation)
                 else:
                     separation_pool = []
                     for i in range(n_agents):
-                        separation = get_agent_separation(env, agentClass, ref_agentClass, params[i], ref_params, policy_params[i], ref_policy_params, dataset)
+                        separation = get_agent_separation(
+                            env,
+                            agentClass,
+                            ref_agentClass,
+                            params[i],
+                            ref_params,
+                            policy_params[i],
+                            ref_policy_params,
+                            dataset,
+                        )
                         separation_pool.append(separation)
                 fitness = np.mean(separation_pool)
             else:
@@ -388,27 +475,59 @@ def get_schedule_fitness(env, agentClass, n_agents, params=None, policy_params=N
         if parallelize:
             if fitness_type == "bias":
                 with Pool(n_agents) as p:
-                    bias_pool = p.starmap(get_agent_bias, [(env, agentClass, params, policy_params, dataset)] * n_agents)
+                    bias_pool = p.starmap(
+                        get_agent_bias, [(env, agentClass, params, policy_params, dataset)] * n_agents
+                    )
                 fitness = np.mean(bias_pool)
             elif fitness_type == "performance":
                 with Pool(n_agents) as p:
-                    performance_pool = p.starmap(get_agent_performance, [(env, agentClass, params, policy_params, dataset)] * n_agents)
+                    performance_pool = p.starmap(
+                        get_agent_performance, [(env, agentClass, params, policy_params, dataset)] * n_agents
+                    )
                 fitness = np.mean(performance_pool)
             elif fitness_type == "failure":
                 with Pool(n_agents) as p:
-                    failure_pool = p.starmap(get_agent_failure, [(env, agentClass, params, policy_params, dataset)] * n_agents)
+                    failure_pool = p.starmap(
+                        get_agent_failure, [(env, agentClass, params, policy_params, dataset)] * n_agents
+                    )
                 fitness = np.mean(failure_pool)
             elif fitness_type == "separation":
                 assert ref_agentClass is not None, "ref_agentClass must be specified for separation"
-                if isinstance(ref_params,list) and isinstance(ref_policy_params,list):
+                if isinstance(ref_params, list) and isinstance(ref_policy_params, list):
                     with Pool(n_agents) as p:
                         separation_pool = p.starmap(
-                            get_agent_separation, [(env, agentClass, ref_agentClass, params, ref_params[i], policy_params, ref_policy_params[i], dataset) for i in range(n_agents)]
+                            get_agent_separation,
+                            [
+                                (
+                                    env,
+                                    agentClass,
+                                    ref_agentClass,
+                                    params,
+                                    ref_params[i],
+                                    policy_params,
+                                    ref_policy_params[i],
+                                    dataset,
+                                )
+                                for i in range(n_agents)
+                            ],
                         )
                 else:
                     with Pool(n_agents) as p:
                         separation_pool = p.starmap(
-                            get_agent_separation, [(env, agentClass, ref_agentClass, params, ref_params, policy_params, ref_policy_params, dataset) for i in range(n_agents)]
+                            get_agent_separation,
+                            [
+                                (
+                                    env,
+                                    agentClass,
+                                    ref_agentClass,
+                                    params,
+                                    ref_params,
+                                    policy_params,
+                                    ref_policy_params,
+                                    dataset,
+                                )
+                                for i in range(n_agents)
+                            ],
                         )
                 fitness = np.mean(separation_pool)
             else:
@@ -434,20 +553,39 @@ def get_schedule_fitness(env, agentClass, n_agents, params=None, policy_params=N
                 fitness = np.mean(failure_pool)
             elif fitness_type == "separation":
                 assert ref_agentClass is not None, "ref_agentClass must be specified for separation"
-                if isinstance(ref_params,list) and isinstance(ref_policy_params,list):
+                if isinstance(ref_params, list) and isinstance(ref_policy_params, list):
                     separation_pool = []
                     for i in range(n_agents):
-                        separation = get_agent_separation(env, agentClass, ref_agentClass, params, ref_params[i], policy_params, ref_policy_params[i], dataset)
+                        separation = get_agent_separation(
+                            env,
+                            agentClass,
+                            ref_agentClass,
+                            params,
+                            ref_params[i],
+                            policy_params,
+                            ref_policy_params[i],
+                            dataset,
+                        )
                         separation_pool.append(separation)
                 else:
                     separation_pool = []
                     for i in range(n_agents):
-                        separation = get_agent_separation(env, agentClass, ref_agentClass, params, ref_params, policy_params, ref_policy_params, dataset)
+                        separation = get_agent_separation(
+                            env,
+                            agentClass,
+                            ref_agentClass,
+                            params,
+                            ref_params,
+                            policy_params,
+                            ref_policy_params,
+                            dataset,
+                        )
                         separation_pool.append(separation)
                 fitness = np.mean(separation_pool)
             else:
                 raise ValueError("Unknown fitness type. Must be 'bias', 'performance', 'failure', or 'separation'")
     return fitness
+
 
 def get_agent_value_history(env, agentClass, params=None, policy_params=None, dataset="rajagopalan"):
     """
@@ -465,9 +603,9 @@ def get_agent_value_history(env, agentClass, params=None, policy_params=None, da
     value_history: value history (np.array)
     """
     if dataset == "rajagopalan":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_rajagopalan.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_rajagopalan.csv")
     elif dataset == "mohanta":
-        model_database = pd.read_csv(FLYMAZERL_PATH+"model_description_mohanta.csv")
+        model_database = pd.read_csv(FLYMAZERL_PATH + "model_description_mohanta.csv")
     else:
         raise ValueError("dataset must be either 'rajagopalan' or 'mohanta'")
 
@@ -488,7 +626,10 @@ def get_agent_value_history(env, agentClass, params=None, policy_params=None, da
     else:
         raise ValueError("Agent does not have q_history")
 
-def get_schedule_values(env, agentClass, n_agents, params=None, policy_params=None, parallelize=False, dataset="rajagopalan"):
+
+def get_schedule_values(
+    env, agentClass, n_agents, params=None, policy_params=None, parallelize=False, dataset="rajagopalan"
+):
     """
     Simulate n_agents agents in parallelize and return their action histories.
     =======================================================================
@@ -511,7 +652,8 @@ def get_schedule_values(env, agentClass, n_agents, params=None, policy_params=No
         if parallelize:
             with Pool(n_agents) as p:
                 value_histories = p.starmap(
-                    get_agent_value_history, [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)]
+                    get_agent_value_history,
+                    [(env, agentClass, params[i], policy_params[i], dataset) for i in range(n_agents)],
                 )
         else:
             value_histories = []
@@ -521,7 +663,9 @@ def get_schedule_values(env, agentClass, n_agents, params=None, policy_params=No
     else:
         if parallelize:
             with Pool(n_agents) as p:
-                value_histories = p.starmap(get_agent_value_history, [(env, agentClass, params, policy_params, dataset)] * n_agents)
+                value_histories = p.starmap(
+                    get_agent_value_history, [(env, agentClass, params, policy_params, dataset)] * n_agents
+                )
         else:
             value_histories = []
             for i in range(n_agents):

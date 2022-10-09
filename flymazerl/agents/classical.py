@@ -16456,8 +16456,8 @@ class DFHCQLearner(FlYMazeAgent):
         """
         self.r_table[state, :action] = (1 - self.kappa_r) * self.r_table[state, :action]
         self.r_table[state, action] = self.alpha_r * (
-            reward + self.gamma * np.max(self.r_table[new_state]) + (1 - self.alpha_r)*self.r_table[state, action]
-        )  # update reward value
+            reward + self.gamma * np.max(self.r_table[new_state])
+        ) + (1 - self.alpha_r)*self.r_table[state, action] # update reward value
         self.r_table[state, action + 1 :] = (1 - self.kappa_r) * self.r_table[state, action + 1 :]
 
         self.h_table[state, :] = (1 - self.alpha_h) * self.h_table[state, :]  # update habit table
