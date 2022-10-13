@@ -70,7 +70,7 @@ class VanillaRNN(nn.Module):
             if "weight" in name:
                 nn.init.xavier_uniform_(param)
 
-    def forward(self, inputs, hidden_state):
+    def forward(self, inputs, hidden_state, get_hidden_dynamics=False):
         """
         Forward pass through the RNN
         =============================
@@ -78,6 +78,7 @@ class VanillaRNN(nn.Module):
         Parameters:
         inputs: The inputs to the RNN (torch.Tensor)
         hidden_state: The hidden state of the RNN (torch.Tensor)
+        get_hidden_dynamics: Whether or not to return the hidden dynamics (bool)
 
         Returns:
         output: The output of the RNN (torch.Tensor)
@@ -93,6 +94,10 @@ class VanillaRNN(nn.Module):
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
 
+        if get_hidden_dynamics:
+            # make a concatenated copy of the output
+            hidden_dynamics = torch.cat((output.clone().detach(), output_.clone().detach()), dim=2)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
 
@@ -106,7 +111,10 @@ class VanillaRNN(nn.Module):
         else:
             output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
 
-        return output
+        if get_hidden_dynamics:
+            return output, hidden_dynamics
+        else:
+            return output
 
     def init_hidden(self, batch_size):
         """
@@ -120,6 +128,34 @@ class VanillaRNN(nn.Module):
         hidden_state: The hidden state of the RNN (torch.Tensor)
         """
         return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
+
+    def decode_hidden_dynamics(self, hidden_dynamics):
+        """
+        Decode the hidden dynamics of the RNN
+        ======================================
+
+        Parameters:
+        hidden_dynamics: The hidden dynamics of the RNN (torch.Tensor)
+
+        Returns:
+        hidden_dynamics: The decoded hidden dynamics of the RNN (torch.Tensor)
+        """
+        hidden_dynamics = torch.split(hidden_dynamics, self.state_size, dim=2)
+
+        output = self.decoder(hidden_dynamics[0])
+        output_ = self.decoder(hidden_dynamics[1])
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
+        else:
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
+
+        return output
 
 
 class LSTMNN(nn.Module):
@@ -180,7 +216,7 @@ class LSTMNN(nn.Module):
             if "weight" in name:
                 nn.init.xavier_uniform_(param)
 
-    def forward(self, inputs, hidden_state):
+    def forward(self, inputs, hidden_state, get_hidden_dynamics=False):
         """
         Forward pass through the LSTM
         =============================
@@ -188,6 +224,7 @@ class LSTMNN(nn.Module):
         Parameters:
         inputs: The inputs to the LSTM (torch.Tensor)
         hidden_state: The hidden state of the LSTM (torch.Tensor)
+        get_hidden_dynamics: Whether or not to return the hidden dynamics (bool)
 
         Returns:
         output: The output of the LSTM (torch.Tensor)
@@ -203,6 +240,10 @@ class LSTMNN(nn.Module):
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
 
+        if get_hidden_dynamics:
+            # make a concatenated copy of the output
+            hidden_dynamics = torch.cat((output.clone().detach(), output_.clone().detach()), dim=2)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
 
@@ -216,7 +257,10 @@ class LSTMNN(nn.Module):
         else:
             output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
 
-        return output
+        if get_hidden_dynamics:
+            return output, hidden_dynamics
+        else:
+            return output
 
     def init_hidden(self, batch_size):
         """
@@ -233,6 +277,34 @@ class LSTMNN(nn.Module):
             torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device),
             torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device),
         )
+
+    def decode_hidden_dynamics(self, hidden_dynamics):
+        """
+        Decode the hidden dynamics of the LSTM
+        ======================================
+
+        Parameters:
+        hidden_dynamics: The hidden dynamics of the LSTM (torch.Tensor)
+
+        Returns:
+        hidden_dynamics: The decoded hidden dynamics of the LSTM (torch.Tensor)
+        """
+        hidden_dynamics = torch.split(hidden_dynamics, self.state_size, dim=2)
+
+        output = self.decoder(hidden_dynamics[0])
+        output_ = self.decoder(hidden_dynamics[1])
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
+        else:
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
+
+        return output
 
 
 class GRUNN(nn.Module):
@@ -293,7 +365,7 @@ class GRUNN(nn.Module):
             if "weight" in name:
                 nn.init.xavier_uniform_(param)
 
-    def forward(self, inputs, hidden_state):
+    def forward(self, inputs, hidden_state, get_hidden_dynamics=False):
         """
         Forward pass through the GRU
         ============================
@@ -316,6 +388,10 @@ class GRUNN(nn.Module):
             output, _ = self.rnn(x, hidden_state)
             output_, _ = self.rnn(x_, hidden_state)
 
+        if get_hidden_dynamics:
+            # make a concatenated copy of the output
+            hidden_dynamics = torch.cat((output.clone().detach(), output_.clone().detach()), dim=2)
+
         output = self.decoder(output)
         output_ = self.decoder(output_)
 
@@ -329,7 +405,10 @@ class GRUNN(nn.Module):
         else:
             output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
 
-        return output
+        if get_hidden_dynamics:
+            return output, hidden_dynamics
+        else:
+            return output
 
     def init_hidden(self, batch_size):
         """
@@ -343,6 +422,34 @@ class GRUNN(nn.Module):
         hidden_state: The hidden state of the GRU (torch.Tensor)
         """
         return torch.zeros(self.num_layers, batch_size, self.state_size).to(self.device)
+
+    def decode_hidden_dynamics(self, hidden_dynamics):
+        """
+        Decode the hidden dynamics of the GRU
+        =====================================
+
+        Parameters:
+        hidden_dynamics: The hidden dynamics of the GRU (torch.Tensor)
+
+        Returns:
+        hidden_dynamics: The decoded hidden dynamics of the GRU (torch.Tensor)
+        """
+        hidden_dynamics = torch.split(hidden_dynamics, self.state_size, dim=2)
+
+        output = self.decoder(hidden_dynamics[0])
+        output_ = self.decoder(hidden_dynamics[1])
+
+        if self.symmetric:
+            output = (output + torch.flip(output_, dims=[2])) / 2
+        else:
+            output = output
+
+        if self.allow_negative_values:
+            output = output
+        else:
+            output = (1 - self.hardness) * torch.nn.Sigmoid()(output) + self.hardness * torch.nn.Hardsigmoid()(output)
+
+        return output
 
 
 class GRNNLearner(FlYMazeAgent):
@@ -664,14 +771,14 @@ class GRNNLearner(FlYMazeAgent):
 
     def get_q_values_from_data(self, actions_set, rewards_set):
         """
-        Given a dataset, infer the action probabilities
+        Given a dataset, infer the value estimates
         ===============================================
 
         actions_set: The set of actions taken in the dataset (np.array)
         rewards_set: The set of rewards obtained in the dataset (np.array)
 
         Returns:
-        action_probabilities: The inferred action probabilities (np.array)
+        q_values: The inferred value estimates (np.array)
         """
 
         dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
@@ -686,6 +793,31 @@ class GRNNLearner(FlYMazeAgent):
         hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
         logits = self.agent.forward(X.float(), hidden)
         return logits[:, :, :].cpu().detach().numpy()
+
+    def get_hidden_dynamics_from_data(self, actions_set, rewards_set):
+        """
+        Given a dataset, infer underlying dynamics of the hidden state
+        =============================================================
+
+        actions_set: The set of actions taken in the dataset (np.array)
+        rewards_set: The set of rewards obtained in the dataset (np.array)
+
+        Returns:
+        hidden_dynamics: The inferred dynamics of the hidden state (np.array)
+        """
+
+        dataset = torch.tensor(np.array([actions_set, rewards_set]).transpose((1, 2, 0)), dtype=torch.int32).to(
+            self.device
+        )
+        X = torch.clone(dataset[:, :-1, :])
+        if self.omission_is_punishment:
+            X = X * 2 - 1
+        else:
+            X[:, :, 0] = X[:, :, 0] * 2 - 1
+
+        hidden = self.agent.init_hidden(X.shape[0]).to(self.device)
+        _, hidden_dynamics = self.agent.forward(X.float(), hidden, get_hidden_dynamics=True)
+        return hidden_dynamics[:, :, :].cpu().detach().numpy()
 
     def load_pre_trained_model(self, model_path):
         """
