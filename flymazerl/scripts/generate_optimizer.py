@@ -22,28 +22,38 @@ while True:
 # ensure all capital letters
 model_id = model_id.upper()
 # open optimization_layout.sh file and replace MODELNAME with model_id
-with open(".\\bash\\optimization_layout.sh", "r") as f:
+with open("./bash/optimization_layout.sh", "r") as f:
     lines = f.readlines()
 
 ## create folder for model
 # get date as MMDDYY
 date = datetime.datetime.now().strftime("%m%d%y")
 # check if folder exists
-if not os.path.exists(f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}"):
-    os.mkdir(f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}")
-    os.mkdir(f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}\\{date}")
+if not os.path.exists(
+    f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}"
+):
+    os.mkdir(
+        f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}"
+    )
+    os.mkdir(
+        f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
+    )
 else:
     i = 1
     if not os.path.exists(
-        f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}\\{date}"
+        f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
     ):
-        os.mkdir(f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}\\{date}")
+        os.mkdir(
+            f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
+        )
     else:
         while os.path.exists(
-            f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}\\{date}_{i}"
+            f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}_{i}"
         ):
             i += 1
-        os.mkdir(f"Z:\\FlYMazeRL_ChoiceEngg\\Optimal_Schedules\\acceptreject\\mohanta2022\\{model_id}\\{date}_{i}")
+        os.mkdir(
+            f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}_{i}"
+        )
         date = f"{date}_{i}"
 
 ## create optimizer script
