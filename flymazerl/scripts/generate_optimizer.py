@@ -22,7 +22,7 @@ while True:
 # ensure all capital letters
 model_id = model_id.upper()
 # open optimization_layout.sh file and replace MODELNAME with model_id
-with open("bash\\optimization_layout.sh", "r") as f:
+with open(".\\bash\\optimization_layout.sh", "r") as f:
     lines = f.readlines()
 
 ## create folder for model
