@@ -38,6 +38,7 @@ if not os.path.exists(
     os.mkdir(
         f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
     )
+    print("Created folders for model")
 else:
     # delete all empty folders
     for folder in os.listdir(
@@ -49,6 +50,7 @@ else:
             os.rmdir(
                 f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{folder}"
             )
+        print("Deleted empty folders")
     i = 1
     if not os.path.exists(
         f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
@@ -65,6 +67,7 @@ else:
             f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}_{i}"
         )
         date = f"{date}_{i}"
+    print("Created folders for model")
 
 ## create optimizer script
 # remove old optimization_{model_id}.sh file
@@ -81,10 +84,15 @@ with open(f"optimization_{model_id}.sh", "w") as f:
             line = line.replace("DATASOURCE", data_source)
         f.write(line)
 
+print(f"Created optimization_{model_id}.sh script")
+
 ## use chmod to make optimizer script executable
 os.system(f"chmod +x optimization_{model_id}.sh")
 
+print(f"Made optimization_{model_id}.sh executable")
+
 ## run optimizer script and wait for it to finish
+print(f"Running optimization_{model_id}.sh")
 # os.system(f"./optimization_{model_id}.sh")
 
 ## print a reminder to delete the optimizer script after it finishes
