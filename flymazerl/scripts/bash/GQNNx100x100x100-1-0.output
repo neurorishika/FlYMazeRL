@@ -1,0 +1,462 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GQLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_reward_set.csv
+Model: GQNN_100-100-100_relu_acceptreject_asymmetric_qp_no-punishment_2022_10_04_02_25_48_828375
+Traceback (most recent call last):
+  File "/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_rajagopalan.py", line 172, in <module>
+    os.makedirs(save_path)
+  File "/groups/turner/home/mohantas/anaconda3/envs/flymazerl/lib/python3.9/os.py", line 225, in makedirs
+    mkdir(name, mode)
+FileExistsError: [Errno 17] File exists: '/groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/GQNN_100-100-100_relu_acceptreject_asymmetric_qp_no-punishment_2022_10_04_02_25_48_828375/'
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u02>
+Subject: Job 126236048: <GQNNx100x100x100-1-0> in cluster <Janelia> Exited
+
+Job <GQNNx100x100x100-1-0> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Tue Oct  4 02:25:33 2022
+Job was executed on host(s) <e10u02>, in queue <local>, as user <mohantas> in cluster <Janelia> at Tue Oct  4 02:25:33 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Tue Oct  4 02:25:33 2022
+Terminated at Tue Oct  4 02:25:50 2022
+Results reported at Tue Oct  4 02:25:50 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_rajagopalan.py --agent GQNN --hidden_state_sizes 100 100 100 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric no --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/ 
+------------------------------------------------------------
+
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   3.71 sec.
+    Max Memory :                                 124 MB
+    Average Memory :                             100.00 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15236.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                12
+    Run time :                                   17 sec.
+    Turnaround time :                            17 sec.
+
+The output (if any) is above this job summary.
+
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: invalid value encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: invalid value encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py:336: RuntimeWarning: divide by zero encountered in log
+  np.log(1 - pred_action_prob[obs_actions == 0])
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GQLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_reward_set.csv
+Model: GQNN_100-100-100_relu_acceptreject_asymmetric_qp_no-punishment_2022_10_08_20_15_43_740222
+Fitting model 1/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6748	Validation Loss: 0.6090
+Epoch 500: 	Training Loss: 0.6931	Validation Loss: 0.6931
+Epoch 1000: 	Training Loss: 0.6203	Validation Loss: 0.6095
+Epoch 1500: 	Training Loss: nan	Validation Loss: nan
+Epoch 2000: 	Training Loss: nan	Validation Loss: nan
+Epoch 2500: 	Training Loss: nan	Validation Loss: nan
+Early stopping at epoch 2606
+Best validation loss: 0.5518
+Fitting model 2/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6121	Validation Loss: 0.5790
+Epoch 500: 	Training Loss: 0.6931	Validation Loss: 0.6931
+Epoch 1000: 	Training Loss: 0.6194	Validation Loss: 0.5859
+Epoch 1500: 	Training Loss: nan	Validation Loss: nan
+Epoch 2000: 	Training Loss: nan	Validation Loss: nan
+Epoch 2500: 	Training Loss: nan	Validation Loss: nan
+Epoch 3000: 	Training Loss: nan	Validation Loss: nan
+Early stopping at epoch 3145
+Best validation loss: 0.5723
+Fitting model 3/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6020	Validation Loss: 0.6053
+Epoch 500: 	Training Loss: 0.6096	Validation Loss: 0.6122
+Epoch 1000: 	Training Loss: 0.6886	Validation Loss: 0.6740
+Epoch 1500: 	Training Loss: 0.6394	Validation Loss: 0.6491
+Epoch 2000: 	Training Loss: 0.6931	Validation Loss: 0.6931
+Epoch 2500: 	Training Loss: 0.6393	Validation Loss: 0.6533
+Epoch 3000: 	Training Loss: 0.6612	Validation Loss: 0.6751
+Early stopping at epoch 3106
+Best validation loss: 0.6038
+Fitting model 4/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.5903	Validation Loss: 0.6411
+Epoch 500: 	Training Loss: 0.6346	Validation Loss: 0.6753
+Epoch 1000: 	Training Loss: 0.6332	Validation Loss: 0.6718
+Epoch 1500: 	Training Loss: 0.5971	Validation Loss: 0.6524
+Epoch 2000: 	Training Loss: 0.6726	Validation Loss: 0.6860
+Epoch 2500: 	Training Loss: 0.6079	Validation Loss: 0.6618
+Early stopping at epoch 2517
+Best validation loss: 0.6390
+Fitting model 5/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6037	Validation Loss: 0.6014
+Epoch 500: 	Training Loss: 0.6372	Validation Loss: 0.6416
+Epoch 1000: 	Training Loss: 0.6394	Validation Loss: 0.6420
+Epoch 1500: 	Training Loss: 0.6393	Validation Loss: 0.6434
+Epoch 2000: 	Training Loss: 0.6931	Validation Loss: 0.6931
+Epoch 2500: 	Training Loss: nan	Validation Loss: nan
+Early stopping at epoch 2511
+Best validation loss: 0.5985
+Fitting is complete. The model fitting log is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/model_fitting_log.csv.
+The model is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/GQNN_100-100-100_relu_acceptreject_asymmetric_qp_no-punishment_2022_10_08_20_15_43_740222/.
+Thank you for using flymazerl. Have a nice day :)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u19>
+Subject: Job 126381411: <GQNNx100x100x100-1-0> in cluster <Janelia> Done
+
+Job <GQNNx100x100x100-1-0> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Sat Oct  8 20:15:32 2022
+Job was executed on host(s) <e10u19>, in queue <local>, as user <mohantas> in cluster <Janelia> at Sat Oct  8 20:15:33 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Sat Oct  8 20:15:33 2022
+Terminated at Mon Oct 10 07:15:23 2022
+Results reported at Mon Oct 10 07:15:23 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_mohanta.py --agent GQNN --hidden_state_sizes 100 100 100 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric no --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/ 
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   250490.55 sec.
+    Max Memory :                                 362 MB
+    Average Memory :                             312.42 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               14998.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                14
+    Run time :                                   125993 sec.
+    Turnaround time :                            125991 sec.
+
+The output (if any) is above this job summary.
+

@@ -1,0 +1,216 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GQLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_reward_set.csv
+Model: GQNN_10-10_relu_acceptreject_symmetric_qp_no-punishment_2022_10_04_02_25_23_590096
+Fitting model 1/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6755	Validation Loss: 0.6575
+Epoch 500: 	Training Loss: 0.6339	Validation Loss: 0.6061
+Epoch 1000: 	Training Loss: 0.6317	Validation Loss: 0.6053
+Epoch 1500: 	Training Loss: 0.6319	Validation Loss: 0.6204
+Epoch 2000: 	Training Loss: 0.6344	Validation Loss: 0.6071
+Epoch 2500: 	Training Loss: 0.6371	Validation Loss: 0.6038
+Epoch 3000: 	Training Loss: 0.6903	Validation Loss: 0.6868
+Early stopping at epoch 3084
+Best validation loss: 0.5991
+Fitting model 2/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6227	Validation Loss: 0.6495
+Epoch 500: 	Training Loss: 0.6188	Validation Loss: 0.6562
+Epoch 1000: 	Training Loss: 0.6220	Validation Loss: 0.6548
+Epoch 1500: 	Training Loss: 0.6200	Validation Loss: 0.6548
+Epoch 2000: 	Training Loss: 0.6210	Validation Loss: 0.6591
+Epoch 2500: 	Training Loss: 0.6509	Validation Loss: 0.6695
+Early stopping at epoch 2500
+Best validation loss: 0.6495
+Fitting model 3/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6335	Validation Loss: 0.6111
+Epoch 500: 	Training Loss: 0.6285	Validation Loss: 0.6192
+Epoch 1000: 	Training Loss: 0.6335	Validation Loss: 0.6417
+Epoch 1500: 	Training Loss: 0.6413	Validation Loss: 0.6209
+Epoch 2000: 	Training Loss: 0.6335	Validation Loss: 0.6140
+Epoch 2500: 	Training Loss: 0.6305	Validation Loss: 0.6344
+Early stopping at epoch 2538
+Best validation loss: 0.6098
+Fitting model 4/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6366	Validation Loss: 0.6424
+Epoch 500: 	Training Loss: 0.6350	Validation Loss: 0.6086
+Epoch 1000: 	Training Loss: 0.6340	Validation Loss: 0.6094
+Epoch 1500: 	Training Loss: 0.6413	Validation Loss: 0.6182
+Epoch 2000: 	Training Loss: 0.6390	Validation Loss: 0.6179
+Epoch 2500: 	Training Loss: 0.6467	Validation Loss: 0.6196
+Early stopping at epoch 2505
+Best validation loss: 0.6002
+Fitting model 5/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6316	Validation Loss: 0.6227
+Epoch 500: 	Training Loss: 0.6281	Validation Loss: 0.6257
+Epoch 1000: 	Training Loss: 0.6286	Validation Loss: 0.6252
+Epoch 1500: 	Training Loss: 0.6298	Validation Loss: 0.6258
+Epoch 2000: 	Training Loss: 0.6304	Validation Loss: 0.6282
+Epoch 2500: 	Training Loss: 0.6294	Validation Loss: 0.6271
+Early stopping at epoch 2566
+Best validation loss: 0.6207
+Fitting is complete. The model fitting log is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/model_fitting_log.csv.
+The model is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/GQNN_10-10_relu_acceptreject_symmetric_qp_no-punishment_2022_10_04_02_25_23_590096/.
+Thank you for using flymazerl. Have a nice day :)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u27>
+Subject: Job 126235743: <GQNNx10x10-3-1> in cluster <Janelia> Done
+
+Job <GQNNx10x10-3-1> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Tue Oct  4 02:25:00 2022
+Job was executed on host(s) <e10u27>, in queue <local>, as user <mohantas> in cluster <Janelia> at Tue Oct  4 02:25:06 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Tue Oct  4 02:25:06 2022
+Terminated at Tue Oct  4 07:46:16 2022
+Results reported at Tue Oct  4 07:46:16 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_rajagopalan.py --agent GQNN --hidden_state_sizes 10 10 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric yes --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/ 
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   38361.12 sec.
+    Max Memory :                                 258 MB
+    Average Memory :                             243.26 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15102.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                14
+    Run time :                                   19279 sec.
+    Turnaround time :                            19276 sec.
+
+The output (if any) is above this job summary.
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GQLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_reward_set.csv
+Model: GQNN_10-10_relu_acceptreject_symmetric_qp_no-punishment_2022_10_08_20_15_19_609469
+Fitting model 1/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6545	Validation Loss: 0.6260
+Epoch 500: 	Training Loss: 0.6056	Validation Loss: 0.5869
+Epoch 1000: 	Training Loss: 0.6720	Validation Loss: 0.6638
+Epoch 1500: 	Training Loss: 0.6038	Validation Loss: 0.5861
+Epoch 2000: 	Training Loss: 0.6033	Validation Loss: 0.5864
+Epoch 2500: 	Training Loss: 0.6042	Validation Loss: 0.5856
+Epoch 3000: 	Training Loss: 0.6034	Validation Loss: 0.5860
+Early stopping at epoch 3164
+Best validation loss: 0.5839
+Fitting model 2/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.5998	Validation Loss: 0.6142
+Epoch 500: 	Training Loss: 0.5958	Validation Loss: 0.6161
+Epoch 1000: 	Training Loss: 0.5956	Validation Loss: 0.6141
+Epoch 1500: 	Training Loss: 0.5960	Validation Loss: 0.6244
+Epoch 2000: 	Training Loss: 0.5992	Validation Loss: 0.6212
+Epoch 2500: 	Training Loss: 0.5951	Validation Loss: 0.6153
+Epoch 3000: 	Training Loss: 0.5942	Validation Loss: 0.6141
+Epoch 3500: 	Training Loss: 0.5957	Validation Loss: 0.6165
+Epoch 4000: 	Training Loss: 0.5990	Validation Loss: 0.6209
+Epoch 4500: 	Training Loss: 0.5947	Validation Loss: 0.6141
+Epoch 5000: 	Training Loss: 0.5952	Validation Loss: 0.6178
+Epoch 5500: 	Training Loss: 0.5949	Validation Loss: 0.6147
+Early stopping at epoch 5899
+Best validation loss: 0.6123
+Fitting model 3/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6053	Validation Loss: 0.5714
+Epoch 500: 	Training Loss: 0.6063	Validation Loss: 0.5724
+Epoch 1000: 	Training Loss: 0.6073	Validation Loss: 0.5746
+Epoch 1500: 	Training Loss: 0.6058	Validation Loss: 0.5735
+Epoch 2000: 	Training Loss: 0.6072	Validation Loss: 0.5738
+Epoch 2500: 	Training Loss: 0.6090	Validation Loss: 0.5760
+Early stopping at epoch 2500
+Best validation loss: 0.5714
+Fitting model 4/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.5999	Validation Loss: 0.5935
+Epoch 500: 	Training Loss: 0.5998	Validation Loss: 0.5930
+Epoch 1000: 	Training Loss: 0.6009	Validation Loss: 0.5985
+Epoch 1500: 	Training Loss: 0.6046	Validation Loss: 0.5986
+Epoch 2000: 	Training Loss: 0.6006	Validation Loss: 0.5932
+Epoch 2500: 	Training Loss: 0.6007	Validation Loss: 0.5939
+Epoch 3000: 	Training Loss: 0.5993	Validation Loss: 0.5932
+Epoch 3500: 	Training Loss: 0.6001	Validation Loss: 0.5938
+Epoch 4000: 	Training Loss: 0.5995	Validation Loss: 0.5934
+Epoch 4500: 	Training Loss: 0.6016	Validation Loss: 0.5941
+Early stopping at epoch 4655
+Best validation loss: 0.5919
+Fitting model 5/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.5923	Validation Loss: 0.6266
+Epoch 500: 	Training Loss: 0.5917	Validation Loss: 0.6271
+Epoch 1000: 	Training Loss: 0.5907	Validation Loss: 0.6271
+Epoch 1500: 	Training Loss: 0.5912	Validation Loss: 0.6278
+Epoch 2000: 	Training Loss: 0.5917	Validation Loss: 0.6291
+Epoch 2500: 	Training Loss: 0.5934	Validation Loss: 0.6298
+Early stopping at epoch 2505
+Best validation loss: 0.6256
+Fitting is complete. The model fitting log is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/model_fitting_log.csv.
+The model is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/GQNN_10-10_relu_acceptreject_symmetric_qp_no-punishment_2022_10_08_20_15_19_609469/.
+Thank you for using flymazerl. Have a nice day :)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u18>
+Subject: Job 126381365: <GQNNx10x10-3-1> in cluster <Janelia> Done
+
+Job <GQNNx10x10-3-1> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Sat Oct  8 20:15:01 2022
+Job was executed on host(s) <e10u18>, in queue <local>, as user <mohantas> in cluster <Janelia> at Sat Oct  8 20:15:03 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Sat Oct  8 20:15:03 2022
+Terminated at Mon Oct 10 05:40:34 2022
+Results reported at Mon Oct 10 05:40:34 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_mohanta.py --agent GQNN --hidden_state_sizes 10 10 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric yes --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/ 
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   238941.81 sec.
+    Max Memory :                                 348 MB
+    Average Memory :                             263.73 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15012.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                14
+    Run time :                                   120335 sec.
+    Turnaround time :                            120333 sec.
+
+The output (if any) is above this job summary.
+

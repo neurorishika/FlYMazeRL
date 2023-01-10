@@ -1,0 +1,162 @@
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GRNNLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/rajagopalan2022/training_reward_set.csv
+Model: GRNN_1x5_RNN_acceptreject_asymmetric_qp_no-punishment_2022_10_04_02_17_35_300321
+Fitting model 1/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6930	Validation Loss: 0.6887
+Epoch 500: 	Training Loss: 0.6145	Validation Loss: 0.6399
+Epoch 1000: 	Training Loss: 0.6425	Validation Loss: 0.6484
+Epoch 1500: 	Training Loss: 0.6126	Validation Loss: 0.6575
+Epoch 2000: 	Training Loss: 0.6549	Validation Loss: 0.6635
+Epoch 2500: 	Training Loss: 0.6076	Validation Loss: 0.6699
+Early stopping at epoch 2574
+Best validation loss: 0.6345
+Fitting model 2/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6914	Validation Loss: 0.6941
+Epoch 500: 	Training Loss: 0.6112	Validation Loss: 0.6725
+Epoch 1000: 	Training Loss: 0.6161	Validation Loss: 0.6764
+Epoch 1500: 	Training Loss: 0.6130	Validation Loss: 0.6879
+Epoch 2000: 	Training Loss: 0.6186	Validation Loss: 0.7529
+Epoch 2500: 	Training Loss: 0.6062	Validation Loss: 0.6920
+Early stopping at epoch 2586
+Best validation loss: 0.6319
+Fitting model 3/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6915	Validation Loss: 0.6901
+Epoch 500: 	Training Loss: 0.6174	Validation Loss: 0.7070
+Epoch 1000: 	Training Loss: 0.5959	Validation Loss: 0.7062
+Epoch 1500: 	Training Loss: 0.6043	Validation Loss: 0.7028
+Epoch 2000: 	Training Loss: 0.5925	Validation Loss: 0.7211
+Epoch 2500: 	Training Loss: 0.6245	Validation Loss: 0.7061
+Early stopping at epoch 2531
+Best validation loss: 0.6784
+Fitting model 4/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6895	Validation Loss: 0.6788
+Epoch 500: 	Training Loss: 0.6295	Validation Loss: 0.6295
+Epoch 1000: 	Training Loss: 0.6221	Validation Loss: 0.6399
+Epoch 1500: 	Training Loss: 0.6159	Validation Loss: 0.6558
+Epoch 2000: 	Training Loss: 0.6138	Validation Loss: 0.6633
+Epoch 2500: 	Training Loss: 0.6253	Validation Loss: 0.6476
+Early stopping at epoch 2557
+Best validation loss: 0.6146
+Fitting model 5/5. Fold 1/1
+Epoch 0: 	Training Loss: 0.6910	Validation Loss: 0.6916
+Epoch 500: 	Training Loss: 0.6079	Validation Loss: 0.6648
+Epoch 1000: 	Training Loss: 0.6029	Validation Loss: 0.6803
+Epoch 1500: 	Training Loss: 0.6232	Validation Loss: 0.6677
+Epoch 2000: 	Training Loss: 0.6261	Validation Loss: 0.6740
+Epoch 2500: 	Training Loss: 0.6159	Validation Loss: 0.6581
+Early stopping at epoch 2546
+Best validation loss: 0.6433
+Fitting is complete. The model fitting log is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/model_fitting_log.csv.
+The model is available at /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/GRNN_1x5_RNN_acceptreject_asymmetric_qp_no-punishment_2022_10_04_02_17_35_300321/.
+Thank you for using flymazerl. Have a nice day :)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u12>
+Subject: Job 126232912: <GRNNx5-1-0> in cluster <Janelia> Done
+
+Job <GRNNx5-1-0> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Tue Oct  4 02:17:06 2022
+Job was executed on host(s) <e10u12>, in queue <local>, as user <mohantas> in cluster <Janelia> at Tue Oct  4 02:17:06 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Tue Oct  4 02:17:06 2022
+Terminated at Tue Oct  4 03:00:36 2022
+Results reported at Tue Oct  4 03:00:36 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_rajagopalan.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric no --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/rajagopalan2022/ 
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   5087.46 sec.
+    Max Memory :                                 242 MB
+    Average Memory :                             232.27 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15118.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                14
+    Run time :                                   2609 sec.
+    Turnaround time :                            2610 sec.
+
+The output (if any) is above this job summary.
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+███████╗██╗     ██╗   ██╗███╗   ███╗ █████╗ ███████╗███████╗██████╗ ██╗     
+██╔════╝██║     ╚██╗ ██╔╝████╗ ████║██╔══██╗╚══███╔╝██╔════╝██╔══██╗██║     
+█████╗  ██║      ╚████╔╝ ██╔████╔██║███████║  ███╔╝ █████╗  ██████╔╝██║     
+██╔══╝  ██║       ╚██╔╝  ██║╚██╔╝██║██╔══██║ ███╔╝  ██╔══╝  ██╔══██╗██║     
+██║     ███████╗   ██║   ██║ ╚═╝ ██║██║  ██║███████╗███████╗██║  ██║███████╗
+╚═╝     ╚══════╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Developed by:
+    Rishika Mohanta, Research Technician, Turner Lab, Janelia Research Campus
+
+Fitting agent: GRNNLearner
+Loading data from:
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_choice_set.csv
+/groups/turner/home/mohantas/project/FlYMazeRL//data/mohanta2022/training_reward_set.csv
+Model: GRNN_1x5_RNN_acceptreject_asymmetric_qp_no-punishment_2022_10_08_20_14_46_228685
+Traceback (most recent call last):
+  File "/groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash/../nn_fitting_mohanta.py", line 172, in <module>
+    os.makedirs(save_path)
+  File "/groups/turner/home/mohantas/anaconda3/envs/flymazerl/lib/python3.9/os.py", line 225, in makedirs
+    mkdir(name, mode)
+FileExistsError: [Errno 17] File exists: '/groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/GRNN_1x5_RNN_acceptreject_asymmetric_qp_no-punishment_2022_10_08_20_14_46_228685/'
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@e10u13>
+Subject: Job 126381327: <GRNNx5-1-0> in cluster <Janelia> Exited
+
+Job <GRNNx5-1-0> was submitted from host <e05u15> by user <mohantas> in cluster <Janelia> at Sat Oct  8 20:14:34 2022
+Job was executed on host(s) <e10u13>, in queue <local>, as user <mohantas> in cluster <Janelia> at Sat Oct  8 20:14:35 2022
+</groups/turner/home/mohantas> was used as the home directory.
+</groups/turner/home/mohantas/project/FlYMazeRL/flymazerl/scripts/bash> was used as the working directory.
+Started at Sat Oct  8 20:14:35 2022
+Terminated at Sat Oct  8 20:14:47 2022
+Results reported at Sat Oct  8 20:14:47 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python ../nn_fitting_mohanta.py --agent GRNN --num_reservoir 1 --reservoir_size 5 --n_folds 1 --n_ensemble 5 --early_stopping 2500 --symmetric no --save_path /groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/nn/mohanta2022/ 
+------------------------------------------------------------
+
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   4.70 sec.
+    Max Memory :                                 209 MB
+    Average Memory :                             150.20 MB
+    Total Requested Memory :                     15360.00 MB
+    Delta Memory :                               15151.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                12
+    Run time :                                   16 sec.
+    Turnaround time :                            13 sec.
+
+The output (if any) is above this job summary.
+
