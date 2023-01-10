@@ -39,6 +39,16 @@ if not os.path.exists(
         f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
     )
 else:
+    # delete all empty folders
+    for folder in os.listdir(
+        f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}"
+    ):
+        if not os.listdir(
+            f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{folder}"
+        ):
+            os.rmdir(
+                f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{folder}"
+            )
     i = 1
     if not os.path.exists(
         f"/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/mohanta2022/{model_id}/{date}"
