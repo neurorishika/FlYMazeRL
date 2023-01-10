@@ -58,7 +58,7 @@ argument_parser.add_argument(
 argument_parser.add_argument(
     "--agent",
     type=str,
-    default="CQES",
+    default="CQBR",
     help="The agent to optimize for (Ref: SHORTCODE column in model_description.csv)",
 )
 argument_parser.add_argument("--n_trials_per_session", type=int, default=100, help="Number of trials per episode")
