@@ -27,7 +27,25 @@ Install Instructions for flymazerl package (Python 3.9 or higher):
     7. Install the FlyMazeRL package locally:
         pip install -e .
     8. Create environment variable for the FlyMazeRL package:
-        set FLYMAZERL_PATH=<path to the FlyMazeRL package>
+        set FLYMAZERL_PATH=<path to the FlyMazeRL package> and add to .bash_rc
+
+Instructions for running optimization:
+
+    1. SSH Login to Janelia cluster:
+	ssh <username>@login1.int.janelia.org
+    2. Clone FlYMazeRL in to preferred directory referred to as <PD> (currently, /project/):
+	git clone https://github.com/neurorishika/FlYMazeRL.git
+    3. Install as per above instructions and make sure the fits are ready in the right directory (currently '/groups/turner/turnerlab/Rishika/FlYMazeRL_Fits/') and the references in the model_description are correct.
+       Also ensure the folder for saving optimized schedules is at the right location (currently '/groups/turner/turnerlab/Rishika/FlYMazeRL_ChoiceEngg/Optimal_Schedules/acceptreject/DATASOURCE2022/')
+    4. Go to scripts directory:
+	cd <PD>/FlYMazeRL/flymazerl/scripts/
+    5. Start virtual environment:
+	conda activate flymazerl
+    6. Run optimizer generator:
+	python generate_optimizer.py
+    7. Enter Model ID (SHORTCODE) from model_description_<mohanta/rajagopalan>.csv and M/R or mohanta/rajagopalan datasets respectively
+    8. Run optimizer scripts:
+	./optimization_<SHORTCODE>.sh
 
 
     
